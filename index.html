@@ -1,426 +1,864 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="NaturIA - Aplicación educativa de Inteligencia Artificial para Ciencias Naturales"/>
-    <meta name="theme-color" content="#6366f1"/>
-    <meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-    <meta name="apple-mobile-web-app-title" content="NaturIA"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="NaturIA - Aplicación educativa de Inteligencia Artificial para Ciencias Naturales">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NaturIA">
+    
     <title>NaturIA - Ciencias con IA</title>
-
-    <link rel="manifest" href="manifest.json"/>
+    
+    <!-- Manifest para PWA -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Iconos para diferentes dispositivos -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🧬%3C/text%3E%3C/svg%3E">
-
-    <!-- Tailwind -->
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- React -->
+    
+    <!-- React y ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel para JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
+    
     <style>
-      /* Base */
-      html, body, #root { height: 100%; }
-      body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: #0f1724; color: #e6eef8; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        #root {
+            min-height: 100vh;
+        }
 
-      /* Scrollbar */
-      ::-webkit-scrollbar { width: 10px; }
-      ::-webkit-scrollbar-track { background: #0b1220; }
-      ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 6px; }
-      ::-webkit-scrollbar-thumb:hover { background: #818cf8; }
+        /* Estilos para la barra de scroll */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
 
-      /* Animations */
-      @keyframes fadeIn { from {opacity:0; transform: translateY(18px);} to {opacity:1; transform: translateY(0);} }
-      @keyframes fadeInScale { from {opacity:0; transform: scale(0.96);} to {opacity:1; transform: scale(1);} }
-      @keyframes slideInLeft { from {opacity:0; transform: translateX(-26px);} to {opacity:1; transform: translateX(0);} }
-      @keyframes slideInRight { from {opacity:0; transform: translateX(26px);} to {opacity:1; transform: translateX(0);} }
-      @keyframes dots { 0% {content: '.';} 33% {content: '..';} 66% {content: '...';} 100% {content: ''; } }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
 
-      .animate-fade-in { animation: fadeIn 420ms cubic-bezier(.22,.9,.3,1) both; }
-      .animate-fade-in-scale { animation: fadeInScale 380ms cubic-bezier(.22,.9,.3,1) both; }
-      .animate-slide-in-left { animation: slideInLeft 420ms cubic-bezier(.22,.9,.3,1) both; }
-      .animate-slide-in-right { animation: slideInRight 420ms cubic-bezier(.22,.9,.3,1) both; }
+        ::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 5px;
+        }
 
-      .stagger-1 { animation-delay: 0.08s; animation-fill-mode: both; }
-      .stagger-2 { animation-delay: 0.16s; animation-fill-mode: both; }
-      .stagger-3 { animation-delay: 0.24s; animation-fill-mode: both; }
-      .stagger-4 { animation-delay: 0.32s; animation-fill-mode: both; }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #818cf8;
+        }
 
-      button, a, input, textarea { transition: all 220ms cubic-bezier(.2,.9,.3,1); }
-      .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.35), 0 8px 10px -6px rgba(0,0,0,0.25); }
+        /* Animaciones de entrada y salida */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-      /* Loading screen (remains until React mounts) */
-      .loading-screen { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; background: linear-gradient(135deg,#111827 0%, #4b1236 100%); z-index:9999; color:white; }
-      .loading-spinner { border:4px solid rgba(255,255,255,0.08); border-top:4px solid #fff; border-radius:50%; width:48px; height:48px; animation: spin 1s linear infinite; }
-      @keyframes spin { 0%{transform:rotate(0deg)}100%{transform:rotate(360deg)} }
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
-      /* Chat layout: container keeps height stable; input area sticky so keyboard/focus doesn't jump page */
-      .chat-panel { display:flex; flex-direction:column; height: 24rem; } /* h-96 */
-      .chat-messages { flex:1; overflow:auto; padding:1.5rem; display:flex; flex-direction:column; gap:0.75rem; }
-      .chat-footer { border-top: 1px solid rgba(148,163,184,0.08); padding:0.8rem; background: rgba(15,23,42,0.5); display:flex; gap:0.5rem; align-items:center; position:relative; }
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
 
-      /* Message bubbles */
-      .bubble-user { background: linear-gradient(90deg,#7c3aed,#ec4899); color:white; border-radius:18px; padding:0.6rem 0.9rem; max-width:75%; word-break:break-word; }
-      .bubble-bot  { background: rgba(15,23,42,0.55); color:#e6eef8; border-radius:14px; padding:0.6rem 0.9rem; max-width:75%; word-break:break-word; border: 1px solid rgba(255,255,255,0.02); }
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
 
-      /* Typing animation dots */
-      .typing-dots { display:inline-block; position:relative; width:36px; height:14px; }
-      .typing-dots span { position:absolute; top:50%; transform:translateY(-50%); width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.85); opacity:0.9; }
-      .typing-dots span:nth-child(1){ left:0; animation: typing 1s infinite 0s; }
-      .typing-dots span:nth-child(2){ left:10px; animation: typing 1s infinite 0.15s; }
-      .typing-dots span:nth-child(3){ left:20px; animation: typing 1s infinite 0.3s; }
-      @keyframes typing { 0%{transform: translateY(-3px); opacity: 0.45;} 50%{ transform: translateY(0px); opacity:1;} 100%{ transform: translateY(-3px); opacity:0.45;} }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
 
-      /* small screens fix */
-      @media (max-width:640px) {
-        .chat-panel { height: 60vh; }
-      }
+        .animate-fade-in-scale {
+            animation: fadeInScale 0.4s ease-out;
+        }
+
+        .animate-slide-in-left {
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        .animate-slide-in-right {
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        /* Animación de delay para elementos que aparecen en secuencia */
+        .stagger-1 {
+            animation-delay: 0.1s;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+
+        .stagger-2 {
+            animation-delay: 0.2s;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+
+        .stagger-3 {
+            animation-delay: 0.3s;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+
+        .stagger-4 {
+            animation-delay: 0.4s;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+
+        /* Transiciones suaves para todos los elementos interactivos */
+        button, a, input {
+            transition: all 0.3s ease;
+        }
+
+        /* Efectos hover mejorados */
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Scroll suave para toda la aplicación */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Animación de carga */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1e1b4b 0%, #581c87 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-  <div id="root">
-    <div class="loading-screen">
-      <div class="loading-spinner"></div>
-      <h2 style="font-size:1.6rem; font-weight:700; margin:0;">NaturIA</h2>
-      <p style="opacity:0.85; margin:0.3rem 0 0 0;">Cargando aplicación...</p>
+    <div id="root">
+        <div class="loading-screen">
+            <div class="loading-spinner"></div>
+            <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">NaturIA</h2>
+            <p style="opacity: 0.8;">Cargando aplicación...</p>
+        </div>
     </div>
-  </div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    <script type="text/babel">
+        const { useState, useRef } = React;
 
-    function NaturIAApp(){
-      const [currentView, setCurrentView] = useState('home');
-      const [selectedStation, setSelectedStation] = useState(null);
-      const [chatMessages, setChatMessages] = useState([]);
-      const [userInput, setUserInput] = useState('');
-      const [showPromptTips, setShowPromptTips] = useState(false);
+        // Componente principal de la aplicación NaturIA
+        function NaturIAApp() {
+          const [currentView, setCurrentView] = useState('home');
+          const [selectedStation, setSelectedStation] = useState(null);
+          const [chatMessages, setChatMessages] = useState([]);
+          const [userInput, setUserInput] = useState('');
+          const [showPromptTips, setShowPromptTips] = useState(false);
 
-      const chatContainerRef = useRef(null);
-      const chatInputRef = useRef(null);
-      const lastMsgRef = useRef(null);
-      const prevMessagesLengthRef = useRef(0);
+          // Ref solo para el input del chat para mantener el foco
+          const chatInputRef = useRef(null);
 
-      // focus input automatically when entering chatbot
-      useEffect(() => {
-        if (currentView === 'chatbot') {
-          setTimeout(() => {
-            if (chatInputRef.current) chatInputRef.current.focus();
-          }, 120); // small delay for animation settle
-        }
-      }, [currentView]);
-
-      // auto-scroll only when messages increase (new message)
-      useEffect(() => {
-        const prevLen = prevMessagesLengthRef.current;
-        const currLen = chatMessages.length;
-        if (currLen > prevLen) {
-          // scroll last message into view smoothly
-          setTimeout(() => {
-            try {
-              if (lastMsgRef.current && typeof lastMsgRef.current.scrollIntoView === 'function') {
-                lastMsgRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-              } else if (chatContainerRef.current) {
-                chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+          // Datos de las estaciones de la feria
+          const stations = [
+            {
+              id: 'genetica',
+              title: 'El Código de la Vida',
+              subtitle: 'Descifrando la Genética con IA',
+              color: 'from-purple-500 to-pink-500',
+              emoji: '🧬',
+              description: 'Explora cómo la inteligencia artificial puede ayudarte a comprender los misterios de la herencia genética y las enfermedades hereditarias.',
+              content: {
+                intro: 'La genética es el estudio de cómo las características se transmiten de padres a hijos a través de los genes. Imagina que cada célula de tu cuerpo contiene un manual de instrucciones escrito en un código especial llamado ADN.',
+                keyPoints: [
+                  'Los genes son como recetas que determinan características como el color de ojos o el tipo de sangre',
+                  'Algunas enfermedades se heredan siguiendo patrones predecibles que podemos estudiar',
+                  'El daltonismo, por ejemplo, está ligado al cromosoma X, por eso afecta más a hombres que a mujeres'
+                ],
+                interactivePrompt: '¿Qué enfermedad hereditaria te gustaría investigar? Puedes preguntar sobre: daltonismo, hemofilia, fibrosis quística, o cualquier otra que conozcas.'
               }
-            } catch(e) { /* ignore */ }
-          }, 80);
-        }
-        prevMessagesLengthRef.current = currLen;
-      }, [chatMessages]);
-
-      // stations data (kept same content; shortened here for brevity but actual content preserved)
-      const stations = [ /* ... (same as before) */ ];
-
-      // ---------- Chatbot logic ----------
-      // Example generator (kept similar to your original responses)
-      const generateEducationalResponse = (input) => {
-        const lower = input.toLowerCase();
-        if (lower.includes('genet') || lower.includes('herencia') || lower.includes('dalton')) {
-          return `Excelente pregunta sobre genética. Los genes son segmentos de ADN... (respuesta educativa adaptada)`;
-        }
-        if (lower.includes('molecula') || lower.includes('átomo') || lower.includes('agua') || lower.includes('h2o') || lower.includes('química')) {
-          return `¡Interesante pregunta sobre química! Las moléculas son como pequeñas construcciones...`;
-        }
-        if (lower.includes('ecosistema') || lower.includes('biodiversidad') || lower.includes('selva') || lower.includes('páramo')) {
-          return `Fascinante que preguntes sobre ecosistemas. Un ecosistema es como una comunidad...`;
-        }
-        if (lower.includes('newton') || lower.includes('fuerza') || lower.includes('movimiento') || lower.includes('física')) {
-          return `¡Excelente pregunta sobre física! Las leyes de Newton son principios fundamentales...`;
-        }
-        if (lower.includes('fotosíntesis') || lower.includes('fotosintesis') || lower.includes('planta')) {
-          return `La fotosíntesis es uno de los procesos más importantes de la vida en la Tierra...`;
-        }
-        return `Gracias por tu pregunta. Soy el chatbot educativo de NaturIA. Para dar una respuesta más precisa, ¿puedes especificar el tema? (genética, moléculas, ecosistemas, Newton, fotosíntesis...)`;
-      };
-
-      // Send message with typing simulation
-      const handleSendMessage = (e) => {
-        e?.preventDefault();
-        const text = userInput.trim();
-        if (!text) return;
-
-        // add user message
-        const userMsg = { type: 'user', text };
-        // add typing placeholder
-        const typingMsg = { type: 'typing', id: Date.now() };
-
-        setChatMessages(prev => [...prev, userMsg, typingMsg]);
-        setUserInput('');
-
-        // simulate typing delay
-        const delay = 1200 + Math.floor(Math.random() * 1200); // 1200-2400ms
-        setTimeout(() => {
-          const botText = generateEducationalResponse(text);
-          setChatMessages(prev => {
-            // replace last typing message with actual bot message
-            const copy = prev.slice();
-            const idx = copy.findIndex(m => m.type === 'typing');
-            if (idx !== -1) {
-              copy.splice(idx, 1, { type: 'bot', text: botText });
-            } else {
-              copy.push({ type: 'bot', text: botText });
+            },
+            {
+              id: 'moleculas',
+              title: 'Zoom Atómico',
+              subtitle: 'Construyendo Moléculas en 3D',
+              color: 'from-blue-500 to-cyan-500',
+              emoji: '⚛️',
+              description: 'Descubre la estructura microscópica de la materia y cómo los átomos se unen para formar todo lo que existe en el universo.',
+              content: {
+                intro: 'Todo lo que ves a tu alrededor está hecho de átomos que se combinan formando moléculas. El agua que bebes, el oxígeno que respiras, incluso tu propio cuerpo, son enormes colecciones de moléculas microscópicas.',
+                keyPoints: [
+                  'Una molécula de agua (H₂O) tiene dos átomos de hidrógeno y uno de oxígeno unidos como si fueran piezas de LEGO',
+                  'Los enlaces químicos son las "fuerzas invisibles" que mantienen unidos a los átomos',
+                  'La forma tridimensional de una molécula determina sus propiedades y funciones'
+                ],
+                interactivePrompt: 'Elige una molécula para explorar: agua (H₂O), dióxido de carbono (CO₂), glucosa (C₆H₁₂O₆), o ADN.'
+              }
+            },
+            {
+              id: 'ecosistemas',
+              title: 'Ecosistemas del Futuro',
+              subtitle: 'Un Viaje Sonoro',
+              color: 'from-green-500 to-emerald-500',
+              emoji: '🌿',
+              description: 'Sumérgete en los sonidos de diferentes ecosistemas y aprende sobre la biodiversidad que los hace únicos.',
+              content: {
+                intro: 'Un ecosistema es como una gran orquesta donde cada ser vivo toca su propio instrumento. Desde el rugido de un jaguar en la Amazonía hasta el canto de las aves en un páramo, cada sonido nos cuenta una historia sobre la vida en ese lugar.',
+                keyPoints: [
+                  'La biodiversidad es la variedad de seres vivos en un ecosistema, y cada uno cumple un papel importante',
+                  'Los ecosistemas colombianos como páramos y selvas son únicos en el mundo',
+                  'El cambio climático está alterando estos delicados equilibrios naturales'
+                ],
+                interactivePrompt: 'Selecciona un ecosistema para explorar: Amazonía, Páramo, Arrecife de Coral, o Bosque Andino.'
+              }
+            },
+            {
+              id: 'newton',
+              title: 'Newton en Acción',
+              subtitle: 'Simulaciones de Física',
+              color: 'from-orange-500 to-red-500',
+              emoji: '⚡',
+              description: 'Experimenta con las leyes fundamentales que gobiernan el movimiento de todos los objetos en el universo.',
+              content: {
+                intro: 'Isaac Newton descubrió tres leyes que explican por qué las cosas se mueven como lo hacen. Estas leyes no son solo teoría abstracta, las experimentas cada día cuando caminas, juegas fútbol o viajas en bus.',
+                keyPoints: [
+                  'Primera Ley: Un objeto en reposo permanece en reposo a menos que una fuerza actúe sobre él (por eso te empujas hacia adelante cuando el bus frena)',
+                  'Segunda Ley: La fuerza es igual a masa por aceleración (F=ma), por eso es más difícil mover una piedra grande que una pequeña',
+                  'Tercera Ley: Por cada acción hay una reacción igual y opuesta (cuando saltas, empujas la tierra hacia abajo y ella te empuja hacia arriba)'
+                ],
+                interactivePrompt: 'Plantea una situación física que te genere curiosidad. Por ejemplo: ¿Por qué los astronautas flotan en el espacio? ¿Por qué es más fácil empujar un carrito vacío que uno lleno?'
+              }
             }
-            return copy;
-          });
+          ];
 
-          // keep focus in input
-          setTimeout(() => {
-            if (chatInputRef.current) chatInputRef.current.focus();
-          }, 80);
-        }, delay);
-      };
+          // Componente de vista Home
+          const HomeView = () => (
+            <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white">
+              <div className="container mx-auto px-4 py-8 max-w-6xl">
+                {/* Header */}
+                <div className="text-center mb-12 animate-fade-in">
+                  <div className="flex items-center justify-center mb-4">
+                    <div style={{fontSize: '4rem'}} className="animate-fade-in-scale">🧠</div>
+                    <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-cyan-300 to-pink-300 bg-clip-text text-transparent ml-4 animate-slide-in-right">
+                      NaturIA
+                    </h1>
+                  </div>
+                  <p className="text-xl md:text-2xl text-purple-200 mb-2 animate-fade-in stagger-1">
+                    Inteligencia Artificial para Ciencias Naturales
+                  </p>
+                  <p className="text-sm md:text-base text-purple-300 max-w-2xl mx-auto animate-fade-in stagger-2">
+                    Institución Educativa Luis Andrade Valderrama - Giraldo, Antioquia
+                  </p>
+                </div>
 
-      const handleInputChange = (e) => {
-        setUserInput(e.target.value);
-      };
+                {/* Introducción */}
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 mb-8 border border-white/20 animate-fade-in stagger-3">
+                  <h2 className="text-2xl font-semibold mb-4 flex items-center">
+                    <span style={{fontSize: '1.5rem', marginRight: '0.5rem'}}>💡</span>
+                    Bienvenido a la Feria de la Ciencia
+                  </h2>
+                  <p className="text-purple-100 leading-relaxed mb-4">
+                    La inteligencia artificial está transformando la forma en que aprendemos. En este proyecto, exploraremos cómo las herramientas de IA pueden ayudarnos a comprender conceptos complejos de Ciencias Naturales, pero siempre manteniendo una postura crítica y reflexiva. No se trata de que la IA piense por nosotros, sino de que sea una aliada en nuestro proceso de aprendizaje.
+                  </p>
+                  <p className="text-purple-100 leading-relaxed">
+                    Recorre nuestras cuatro estaciones interactivas, experimenta con el chatbot educativo, y descubre cómo validamos la información que nos proporciona la tecnología. Este es un viaje donde la curiosidad científica y la tecnología se encuentran.
+                  </p>
+                </div>
 
-      const handleKeyDown = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          handleSendMessage(e);
-        }
-      };
+                {/* Botones de navegación */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <button
+                    onClick={() => setCurrentView('stations')}
+                    className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 rounded-xl p-6 text-left transition-all hover-lift shadow-lg animate-fade-in stagger-4"
+                  >
+                    <div style={{fontSize: '2.5rem', marginBottom: '0.75rem'}}>📚</div>
+                    <h3 className="text-2xl font-bold mb-2">Explorar Estaciones</h3>
+                    <p className="text-blue-100">
+                      Visita las cuatro estaciones interactivas y aprende sobre genética, moléculas, ecosistemas y física.
+                    </p>
+                  </button>
 
-      // ---------- Views (Home / Stations / Chatbot / Metacognition) ----------
-      const HomeView = () => (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white">
-          <div className="container mx-auto px-4 py-8 max-w-6xl">
-            <div className="text-center mb-12 animate-fade-in">
-              <div className="flex items-center justify-center mb-4">
-                <div style={{fontSize:'4rem'}} className="animate-fade-in-scale">🧠</div>
-                <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-cyan-300 to-pink-300 bg-clip-text text-transparent ml-4 animate-slide-in-right">NaturIA</h1>
-              </div>
-              <p className="text-xl md:text-2xl text-purple-200 mb-2 animate-fade-in stagger-1">Inteligencia Artificial para Ciencias Naturales</p>
-              <p className="text-sm md:text-base text-purple-300 max-w-2xl mx-auto animate-fade-in stagger-2">Institución Educativa Luis Andrade Valderrama - Giraldo, Antioquia</p>
-            </div>
+                  <button
+                    onClick={() => setCurrentView('chatbot')}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl p-6 text-left transition-all hover-lift shadow-lg animate-fade-in stagger-4"
+                  >
+                    <div style={{fontSize: '2.5rem', marginBottom: '0.75rem'}}>💬</div>
+                    <h3 className="text-2xl font-bold mb-2">Chatbot Educativo</h3>
+                    <p className="text-purple-100">
+                      Haz preguntas sobre ciencias naturales y aprende a crear prompts efectivos para obtener mejores respuestas.
+                    </p>
+                  </button>
+                </div>
 
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 mb-8 border border-white/20 animate-fade-in stagger-3">
-              <h2 className="text-2xl font-semibold mb-4 flex items-center"><span style={{fontSize:'1.5rem', marginRight:'0.5rem'}}>💡</span>Bienvenido a la Feria de la Ciencia</h2>
-              <p className="text-purple-100 leading-relaxed mb-4">La inteligencia artificial está transformando la forma en que aprendemos. ...</p>
-              <p className="text-purple-100 leading-relaxed">Recorre nuestras estaciones interactivas, experimenta con el chatbot educativo, y descubre cómo validamos la información que nos proporciona la tecnología.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <button onClick={() => setCurrentView('stations')}
-                      className="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl p-6 text-left hover-lift shadow-lg animate-fade-in stagger-4">
-                <div style={{fontSize:'2.5rem', marginBottom:'0.75rem'}}>📚</div>
-                <h3 className="text-2xl font-bold mb-2">Explorar Estaciones</h3>
-                <p className="text-blue-100">Visita las cuatro estaciones interactivas ...</p>
-              </button>
-
-              <button onClick={() => setCurrentView('chatbot')}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-left hover-lift shadow-lg animate-fade-in stagger-4">
-                <div style={{fontSize:'2.5rem', marginBottom:'0.75rem'}}>💬</div>
-                <h3 className="text-2xl font-bold mb-2">Chatbot Educativo</h3>
-                <p className="text-purple-100">Haz preguntas sobre ciencias naturales y aprende a crear prompts efectivos para obtener mejores respuestas.</p>
-              </button>
-            </div>
-
-            <button onClick={() => setCurrentView('metacognition')}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-left hover-lift shadow-lg animate-fade-in stagger-4">
-              <div style={{fontSize:'2.5rem', marginBottom:'0.75rem'}}>🧠</div>
-              <h3 className="text-2xl font-bold mb-2">Proceso de Metacognición</h3>
-              <p className="text-green-100">Descubre cómo validamos la información de la IA y desarrollamos pensamiento crítico en el proceso de aprendizaje.</p>
-            </button>
-          </div>
-        </div>
-      );
-
-      const StationsView = () => (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-          <div className="container mx-auto px-4 py-8 max-w-6xl">
-            <button onClick={() => setCurrentView('home')} className="flex items-center text-cyan-300 hover:text-cyan-400 mb-6 transition-colors">
-              <span style={{fontSize:'1.2rem', marginRight:'0.5rem'}}>🏠</span> <span>Volver al inicio</span>
-            </button>
-
-            <h1 className="text-4xl font-bold mb-8 text-center">Estaciones Interactivas</h1>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Keep original station buttons — simplified here */}
-              <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-6 hover:scale-105 transition-transform transform hover-lift shadow-xl" onClick={() => { /* sample */ }}>
-                <div style={{fontSize:'3rem', marginBottom:'1rem'}}>🧬</div>
-                <h2 className="text-2xl font-bold mb-2">El Código de la Vida</h2>
-                <p className="text-lg opacity-90 mb-3">Descifrando la Genética con IA</p>
+                <button
+                  onClick={() => setCurrentView('metacognition')}
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-xl p-6 text-left transition-all hover-lift shadow-lg animate-fade-in stagger-4"
+                >
+                  <div style={{fontSize: '2.5rem', marginBottom: '0.75rem'}}>🧠</div>
+                  <h3 className="text-2xl font-bold mb-2">Proceso de Metacognición</h3>
+                  <p className="text-green-100">
+                    Descubre cómo validamos la información de la IA y desarrollamos pensamiento crítico en el proceso de aprendizaje.
+                  </p>
+                </button>
               </div>
             </div>
-          </div>
-        </div>
-      );
+          );
 
-      const StationDetail = () => {
-        if (!selectedStation) return null;
-        return (
-          <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
-              <button onClick={() => setSelectedStation(null)} className="flex items-center text-cyan-300 hover:text-cyan-400 mb-6 transition-colors">← Volver a estaciones</button>
-
-              <div className={`bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-8 mb-8`}>
-                <div style={{fontSize:'4rem', marginBottom:'1rem'}}>🧬</div>
-                <h1 className="text-4xl font-bold mb-2">El Código de la Vida</h1>
-                <p className="text-xl opacity-90">Descifrando la Genética con IA</p>
-              </div>
-            </div>
-          </div>
-        );
-      };
-
-      const ChatbotView = () => {
-        return (
-          <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 text-white">
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
-              <button onClick={() => setCurrentView('home')} className="flex items-center text-cyan-300 hover:text-cyan-400 mb-6 transition-colors">🏠 Volver al inicio</button>
-
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-6 mb-6 animate-fade-in">
-                <h1 className="text-3xl font-bold mb-2 flex items-center"><span style={{fontSize:'2rem', marginRight:'0.75rem'}}>💬</span>Chatbot Educativo NaturIA</h1>
-                <p className="text-purple-100">Haz preguntas sobre Ciencias Naturales y aprende a crear mejores prompts</p>
-              </div>
-
-              <div className="mb-6">
-                <button onClick={() => setShowPromptTips(!showPromptTips)} className="w-full bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl p-4 text-left flex items-center justify-between hover-lift">
-                  <div className="flex items-center"><span style={{fontSize:'1.5rem', marginRight:'0.75rem'}}>💡</span><span className="font-semibold">Guía: Cómo hacer buenos prompts</span></div>
-                  <span style={{fontSize:'1.5rem'}}>{showPromptTips ? '▼' : '▶'}</span>
+          // Componente de vista de Estaciones
+          const StationsView = () => (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+              <div className="container mx-auto px-4 py-8 max-w-6xl">
+                <button
+                  onClick={() => setCurrentView('home')}
+                  className="flex items-center text-cyan-300 hover:text-cyan-400 mb-6 transition-colors"
+                >
+                  <span style={{fontSize: '1.2rem', marginRight: '0.5rem'}}>🏠</span>
+                  <span>Volver al inicio</span>
                 </button>
 
-                {showPromptTips && (
-                  <div className="mt-4 bg-slate-800/70 rounded-xl p-6 border border-slate-700 animate-fade-in-scale">
-                    <p className="text-slate-200">Un prompt efectivo es claro, específico y contextualizado. Aquí ejemplos ...</p>
-                  </div>
-                )}
-              </div>
+                <h1 className="text-4xl font-bold mb-8 text-center">Estaciones Interactivas</h1>
 
-              <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl border border-slate-700 overflow-hidden animate-fade-in-scale">
-                <div ref={chatContainerRef} className="chat-panel">
-                  <div className="chat-messages">
-                    {/* Empty state */}
-                    {chatMessages.length === 0 ? (
-                      <div className="text-center text-slate-400 py-12">
-                        <div style={{fontSize:'4rem', opacity:0.45, marginBottom:'1rem'}}>💬</div>
-                        <p className="text-lg mb-2">¡Hola! Soy tu asistente de Ciencias Naturales</p>
-                        <p className="text-sm">Hazme una pregunta sobre genética, química, ecosistemas o física</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {stations.map((station) => (
+                    <button
+                      key={station.id}
+                      onClick={() => setSelectedStation(station)}
+                      className={`bg-gradient-to-br ${station.color} rounded-2xl p-6 text-left transition-all transform hover:scale-105 shadow-xl`}
+                    >
+                      <div style={{fontSize: '3rem', marginBottom: '1rem'}}>{station.emoji}</div>
+                      <h2 className="text-2xl font-bold mb-2">{station.title}</h2>
+                      <p className="text-lg opacity-90 mb-3">{station.subtitle}</p>
+                      <p className="text-sm opacity-80">{station.description}</p>
+                      <div className="flex items-center mt-4 text-sm font-semibold">
+                        Explorar <span style={{marginLeft: '0.25rem'}}>→</span>
                       </div>
-                    ) : (
-                      chatMessages.map((msg, idx) => {
-                        const isLast = idx === chatMessages.length - 1;
-                        if (msg.type === 'user') {
-                          return (
-                            <div key={idx} className="flex justify-end">
-                              <div className="bubble-user animate-fade-in-right" ref={isLast ? lastMsgRef : null}>
-                                <p className="whitespace-pre-line">{msg.text}</p>
-                              </div>
-                            </div>
-                          );
-                        } else if (msg.type === 'typing') {
-                          return (
-                            <div key={msg.id || idx} className="flex justify-start">
-                              <div className="bubble-bot animate-fade-in-left" ref={isLast ? lastMsgRef : null}>
-                                <div className="typing-dots" aria-hidden="true">
-                                  <span></span><span></span><span></span>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <div key={idx} className="flex justify-start">
-                              <div className="bubble-bot animate-fade-in-left" ref={isLast ? lastMsgRef : null}>
-                                <p className="whitespace-pre-line">{msg.text}</p>
-                              </div>
-                            </div>
-                          );
-                        }
-                      })
-                    )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+
+          // Componente de detalle de estación
+          const StationDetail = () => {
+            if (!selectedStation) return null;
+
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+                <div className="container mx-auto px-4 py-8 max-w-4xl">
+                  <button
+                    onClick={() => setSelectedStation(null)}
+                    className="flex items-center text-cyan-300 hover:text-cyan-400 mb-6 transition-colors"
+                  >
+                    <span style={{marginRight: '0.5rem'}}>←</span>
+                    <span>Volver a estaciones</span>
+                  </button>
+
+                  <div className={`bg-gradient-to-br ${selectedStation.color} rounded-2xl p-8 mb-8`}>
+                    <div style={{fontSize: '4rem', marginBottom: '1rem'}}>{selectedStation.emoji}</div>
+                    <h1 className="text-4xl font-bold mb-2">{selectedStation.title}</h1>
+                    <p className="text-xl opacity-90">{selectedStation.subtitle}</p>
                   </div>
 
-                  <div className="chat-footer">
-                    <form onSubmit={handleSendMessage} style={{display:'flex', flex:1, gap:'0.5rem', alignItems:'center'}}>
-                      <input
-                        ref={chatInputRef}
-                        type="text"
-                        value={userInput}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Escribe tu pregunta aquí..."
-                        className="flex-1 bg-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        autoComplete="off"
-                        aria-label="Mensaje"
-                      />
-                      <button type="submit" className="bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 rounded-xl font-semibold hover-lift">Enviar</button>
-                    </form>
+                  <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-6 md:p-8 mb-6 border border-slate-700">
+                    <h2 className="text-2xl font-semibold mb-4 text-cyan-300">¿Qué aprenderás aquí?</h2>
+                    <p className="text-slate-200 leading-relaxed mb-6">
+                      {selectedStation.content.intro}
+                    </p>
+
+                    <h3 className="text-xl font-semibold mb-3 text-purple-300">Conceptos clave:</h3>
+                    <div className="space-y-3 mb-6">
+                      {selectedStation.content.keyPoints.map((point, idx) => (
+                        <div key={idx} className="flex items-start">
+                          <div className="w-2 h-2 rounded-full bg-cyan-400 mt-2 mr-3 flex-shrink-0"></div>
+                          <p className="text-slate-200">{point}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-xl p-5 border border-purple-500/30">
+                      <h3 className="text-lg font-semibold mb-2 text-pink-300">Explora con IA:</h3>
+                      <p className="text-slate-200 mb-4">{selectedStation.content.interactivePrompt}</p>
+                      <button
+                        onClick={() => {
+                          setCurrentView('chatbot');
+                          setSelectedStation(null);
+                        }}
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 py-3 rounded-lg font-semibold transition-all flex items-center"
+                      >
+                        <span style={{marginRight: '0.5rem'}}>💬</span>
+                        Ir al Chatbot
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+            );
+          };
 
-              <p className="text-xs text-slate-400 mt-2">Tip: Sé específico en tu pregunta para obtener respuestas más útiles</p>
-            </div>
-          </div>
-        );
-      };
+          // Componente del Chatbot
+          const ChatbotView = () => {
+            const handleSendMessage = (e) => {
+              e?.preventDefault();
+              if (userInput.trim() === '') return;
 
-      const MetacognitionView = () => (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
-          <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <button onClick={() => setCurrentView('home')} className="flex items-center text-cyan-300 hover:text-cyan-400 mb-6">🏠 Volver al inicio</button>
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 mb-8">
-              <h1 className="text-3xl font-bold">Proceso de Metacognición</h1>
-              <p className="text-purple-100">Cómo pensamos sobre nuestro propio aprendizaje ...</p>
-            </div>
-            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
-              <h2 className="text-2xl font-semibold mb-4 text-cyan-300">¿Qué es la Metacognición?</h2>
-              <p className="text-slate-200">La metacognición es "pensar sobre cómo pensamos" ...</p>
-            </div>
-          </div>
-        </div>
-      );
+              const newMessages = [...chatMessages, { type: 'user', text: userInput }];
+              const response = generateEducationalResponse(userInput);
+              newMessages.push({ type: 'bot', text: response });
+              
+              setChatMessages(newMessages);
+              setUserInput('');
+              
+              // Mantener el foco en el input después de enviar
+              if (chatInputRef.current) {
+                setTimeout(() => chatInputRef.current.focus(), 100);
+              }
+            };
 
-      // render
-      if (selectedStation) return <StationDetail />;
-      switch (currentView) {
-        case 'stations': return <StationsView />;
-        case 'chatbot': return <ChatbotView />;
-        case 'metacognition': return <MetacognitionView />;
-        default: return <HomeView />;
-      }
-    }
+            const handleInputChange = (e) => {
+              setUserInput(e.target.value);
+            };
 
-    // Render application and remove the initial loading-screen
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<NaturIAApp />);
-  </script>
+            const handleKeyPress = (e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage(e);
+              }
+            };
 
-  <!-- Service worker register (kept same) -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(reg => console.log('Service Worker registrado'))
-          .catch(err => console.log('Error al registrar Service Worker:', err));
-      });
-    }
-  </script>
+            const generateEducationalResponse = (input) => {
+              const lowerInput = input.toLowerCase();
+              
+              if (lowerInput.includes('genetic') || lowerInput.includes('gen') || lowerInput.includes('herencia') || lowerInput.includes('dalton')) {
+                return `Excelente pregunta sobre genética. Los genes son segmentos de ADN que contienen instrucciones para construir proteínas, que son las moléculas que hacen funcionar tu cuerpo. Cada característica heredable, desde el color de tus ojos hasta tu tipo de sangre, está determinada por combinaciones específicas de genes que heredaste de tus padres. 
+
+Si hablamos específicamente del daltonismo, es una condición que afecta la percepción de colores y está ligada al cromosoma X. Por eso los hombres tienen más probabilidad de ser daltónicos, porque solo tienen un cromosoma X, mientras que las mujeres tienen dos (XX) y pueden compensar un gen defectuoso con el cromosoma X saludable.
+
+¿Te gustaría explorar algún otro aspecto de la herencia genética o preguntar sobre otra enfermedad hereditaria?`;
+              }
+              
+              if (lowerInput.includes('molecula') || lowerInput.includes('átomo') || lowerInput.includes('agua') || lowerInput.includes('h2o') || lowerInput.includes('química')) {
+                return `¡Interesante pregunta sobre química! Las moléculas son como pequeñas construcciones hechas de átomos. Piensa en los átomos como bloques de LEGO y las moléculas como las figuras que construyes con ellos.
+
+Por ejemplo, una molécula de agua (H₂O) está formada por dos átomos de hidrógeno unidos a un átomo de oxígeno. Esta estructura en forma de "V" no es casualidad: la geometría de la molécula determina todas las propiedades del agua, como su capacidad para disolver sustancias, su punto de ebullición, e incluso por qué el hielo flota.
+
+Los enlaces químicos que mantienen unidos estos átomos son fuerzas electromagnéticas, como si fueran imanes invisibles que mantienen la estructura estable.
+
+¿Quieres que exploremos otra molécula o profundicemos en algún concepto específico de la química?`;
+              }
+              
+              if (lowerInput.includes('ecosistema') || lowerInput.includes('biodiversidad') || lowerInput.includes('selva') || lowerInput.includes('páramo') || lowerInput.includes('ambiente')) {
+                return `Fascinante que preguntes sobre ecosistemas. Un ecosistema es como una comunidad viviente donde todos los organismos interactúan entre sí y con su entorno físico. Es un sistema complejo donde cada especie tiene un papel importante.
+
+Colombia es uno de los países más biodiversos del mundo. Nuestros páramos, por ejemplo, son ecosistemas únicos que funcionan como "fábricas de agua" porque capturan y almacenan agua de la lluvia y la niebla. Las plantas del páramo, los frailejones, están perfectamente adaptadas a las condiciones extremas de altura, frío y radiación solar intensa.
+
+La biodiversidad no es solo "muchas especies diferentes", es también la red de relaciones entre ellas. Si una especie desaparece, puede afectar a muchas otras que dependían de ella.
+
+¿Te gustaría explorar un ecosistema específico de Colombia o entender mejor cómo el cambio climático está afectando estos sistemas?`;
+              }
+              
+              if (lowerInput.includes('newton') || lowerInput.includes('fuerza') || lowerInput.includes('movimiento') || lowerInput.includes('física') || lowerInput.includes('ley')) {
+                return `¡Excelente pregunta sobre física! Las leyes de Newton son los principios fundamentales que explican cómo y por qué se mueven las cosas en el universo.
+
+La Primera Ley (inercia) nos dice que los objetos "prefieren" mantener su estado actual: si están quietos, quieren seguir quietos; si están en movimiento, quieren seguir moviéndose en línea recta. Por eso cuando vas en un bus y frena bruscamente, tu cuerpo sigue queriendo avanzar y te impulsas hacia adelante.
+
+La Segunda Ley (F=ma) nos explica que la aceleración de un objeto depende de la fuerza que le apliques y de su masa. Es por esto que empujar un carrito de supermercado vacío es mucho más fácil que empujar uno lleno.
+
+La Tercera Ley (acción-reacción) establece que cada fuerza tiene una fuerza de igual magnitud pero en dirección opuesta. Cuando caminas, empujas el suelo hacia atrás y el suelo te empuja a ti hacia adelante con la misma fuerza.
+
+¿Quieres que analicemos alguna situación específica usando estas leyes?`;
+              }
+
+              if (lowerInput.includes('fotosíntesis') || lowerInput.includes('fotosintesis') || lowerInput.includes('planta')) {
+                return `La fotosíntesis es uno de los procesos más importantes de la vida en la Tierra. Es como una fábrica química que opera dentro de las hojas de las plantas, específicamente en unos orgánulos llamados cloroplastos.
+
+El proceso convierte energía solar en energía química almacenada en moléculas de glucosa. La ecuación simplificada es: 6CO₂ + 6H₂O + luz solar → C₆H₁₂O₆ + 6O₂
+
+Las plantas toman dióxido de carbono del aire y agua del suelo, y usando la energía de la luz solar, producen glucosa (azúcar que les sirve de alimento) y liberan oxígeno como subproducto. Este oxígeno es el que nosotros respiramos.
+
+Sin la fotosíntesis, no existiría la vida como la conocemos. Las plantas son la base de casi todas las cadenas alimenticias y son las responsables de mantener el oxígeno en nuestra atmósfera.
+
+¿Te gustaría profundizar en alguna fase específica de la fotosíntesis o explorar cómo se relaciona con otros ciclos naturales?`;
+              }
+              
+              return `Gracias por tu pregunta. Como chatbot educativo de NaturIA, estoy diseñado para ayudarte a explorar conceptos de Ciencias Naturales, específicamente en las áreas de genética, química molecular, ecosistemas y física (leyes de Newton).
+
+Tu pregunta es interesante, pero para darte una respuesta más precisa y educativa, me ayudaría que reformularas tu pregunta siendo más específico sobre cuál de estos temas te gustaría explorar:
+
+🧬 Genética y herencia
+⚛️ Moléculas y química
+🌿 Ecosistemas y biodiversidad  
+⚡ Leyes de Newton y física del movimiento
+
+También recuerda que puedes mejorar tus prompts siendo claro sobre qué nivel de detalle necesitas. Por ejemplo, en lugar de preguntar solo "¿Qué es X?", podrías preguntar "¿Puedes explicarme X como si tuviera 15 años y dame ejemplos cotidianos?".
+
+¿Sobre cuál tema te gustaría que conversemos?`;
+            };
+
+            const promptExamples = [
+              {
+                bad: "Dime sobre genética",
+                good: "Explícame cómo funciona la herencia del daltonismo usando un ejemplo de árbol genealógico",
+                reason: "El segundo prompt es específico sobre qué aspecto de la genética quieres entender y pide un formato concreto (árbol genealógico)"
+              },
+              {
+                bad: "Cuéntame de las moléculas",
+                good: "Actúa como un profesor de química y explícame por qué el agua tiene propiedades únicas debido a su estructura molecular",
+                reason: "El segundo prompt define un rol para la IA y conecta la estructura con las propiedades, mostrando qué tipo de comprensión buscas"
+              },
+              {
+                bad: "Info sobre Newton",
+                good: "Dame tres ejemplos cotidianos de la Primera Ley de Newton y explica la física detrás de cada uno",
+                reason: "El segundo prompt pide ejemplos concretos y solicita explicación, no solo información superficial"
+              }
+            ];
+
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 text-white">
+                <div className="container mx-auto px-4 py-8 max-w-4xl">
+                  <button
+                    onClick={() => setCurrentView('home')}
+                    className="flex items-center text-cyan-300 hover:text-cyan-400 mb-6 transition-colors"
+                  >
+                    <span style={{fontSize: '1.2rem', marginRight: '0.5rem'}}>🏠</span>
+                    <span>Volver al inicio</span>
+                  </button>
+
+                  <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-6 mb-6">
+                    <h1 className="text-3xl font-bold mb-2 flex items-center">
+                      <span style={{fontSize: '2rem', marginRight: '0.75rem'}}>💬</span>
+                      Chatbot Educativo NaturIA
+                    </h1>
+                    <p className="text-purple-100">
+                      Haz preguntas sobre Ciencias Naturales y aprende a crear mejores prompts
+                    </p>
+                  </div>
+
+                  <div className="mb-6">
+                    <button
+                      onClick={() => setShowPromptTips(!showPromptTips)}
+                      className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 rounded-xl p-4 text-left transition-all flex items-center justify-between"
+                    >
+                      <div className="flex items-center">
+                        <span style={{fontSize: '1.5rem', marginRight: '0.75rem'}}>💡</span>
+                        <span className="font-semibold">Guía: Cómo hacer buenos prompts</span>
+                      </div>
+                      <span style={{fontSize: '1.5rem'}}>{showPromptTips ? '▼' : '▶'}</span>
+                    </button>
+
+                    {showPromptTips && (
+                      <div className="mt-4 bg-slate-800/70 rounded-xl p-6 space-y-6 border border-slate-700">
+                        <p className="text-slate-200">
+                          Un prompt efectivo es claro, específico y contextualizado. Aquí te mostramos ejemplos de cómo transformar preguntas vagas en prompts que generan respuestas educativas valiosas:
+                        </p>
+
+                        {promptExamples.map((example, idx) => (
+                          <div key={idx} className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                            <div className="mb-3">
+                              <p className="text-red-400 font-semibold mb-1 flex items-center">
+                                <span className="text-red-500 mr-2">✗</span>Prompt vago:
+                              </p>
+                              <p className="text-slate-300 italic">"{example.bad}"</p>
+                            </div>
+                            <div className="mb-3">
+                              <p className="text-green-400 font-semibold mb-1 flex items-center">
+                                <span className="text-green-500 mr-2">✓</span>Prompt efectivo:
+                              </p>
+                              <p className="text-slate-300 italic">"{example.good}"</p>
+                            </div>
+                            <div className="bg-blue-900/30 rounded p-3 border-l-4 border-blue-400">
+                              <p className="text-blue-200 text-sm">
+                                <span className="font-semibold">Por qué funciona mejor:</span> {example.reason}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl border border-slate-700 overflow-hidden">
+                    <div className="h-96 overflow-y-auto p-6 space-y-4">
+                      {chatMessages.length === 0 ? (
+                        <div className="text-center text-slate-400 py-12">
+                          <div style={{fontSize: '4rem', opacity: '0.5', marginBottom: '1rem'}}>💬</div>
+                          <p className="text-lg mb-2">¡Hola! Soy tu asistente de Ciencias Naturales</p>
+                          <p className="text-sm">Hazme una pregunta sobre genética, química, ecosistemas o física</p>
+                        </div>
+                      ) : (
+                        chatMessages.map((msg, idx) => (
+                          <div
+                            key={idx}
+                            className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-3/4 rounded-2xl px-4 py-3 ${
+                                msg.type === 'user'
+                                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
+                                  : 'bg-slate-700 text-slate-100'
+                              }`}
+                            >
+                              <p className="whitespace-pre-line">{msg.text}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="border-t border-slate-700 p-4 bg-slate-800">
+                      <form onSubmit={handleSendMessage} className="flex gap-2">
+                        <input
+                          ref={chatInputRef}
+                          type="text"
+                          value={userInput}
+                          onChange={handleInputChange}
+                          onKeyPress={handleKeyPress}
+                          placeholder="Escribe tu pregunta aquí..."
+                          className="flex-1 bg-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          autoComplete="off"
+                        />
+                        <button
+                          type="submit"
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-3 rounded-xl font-semibold transition-all"
+                        >
+                          Enviar
+                        </button>
+                      </form>
+                      <p className="text-xs text-slate-400 mt-2">
+                        Tip: Sé específico en tu pregunta para obtener respuestas más útiles
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+          // Componente de Metacognición
+          const MetacognitionView = () => {
+            const metacognitionSteps = [
+              {
+                number: 1,
+                title: 'Nuestra duda era...',
+                description: 'Identificamos qué no entendíamos o qué queríamos investigar. Por ejemplo: "No entendemos por qué algunos niños heredan el daltonismo de su madre pero ella no lo tiene."',
+                color: 'from-blue-500 to-cyan-500',
+                icon: '🤔'
+              },
+              {
+                number: 2,
+                title: 'Le pedimos a la IA que...',
+                description: 'Diseñamos un prompt específico y claro. Por ejemplo: "Actúa como un profesor de genética. Explícame por qué el daltonismo se hereda más en hombres aunque las madres sean portadoras sin manifestar la condición. Usa un ejemplo de árbol genealógico."',
+                color: 'from-purple-500 to-pink-500',
+                icon: '💬'
+              },
+              {
+                number: 3,
+                title: 'La IA nos respondió...',
+                description: 'Recibimos una explicación sobre herencia ligada al cromosoma X, incluyendo conceptos como genes dominantes/recesivos, portadores, y por qué los hombres (XY) tienen mayor probabilidad de expresar la condición que las mujeres (XX) que tienen un segundo cromosoma X de respaldo.',
+                color: 'from-green-500 to-emerald-500',
+                icon: '🤖'
+              },
+              {
+                number: 4,
+                title: 'Nosotros lo comprobamos/complementamos con...',
+                description: 'Buscamos fuentes confiables (libros de biología, artículos científicos, simuladores genéticos), construimos nuestro propio árbol genealógico con materiales físicos, consultamos con el profesor, y verificamos que la explicación de la IA era correcta. También identificamos si había algo que necesitara más investigación.',
+                color: 'from-orange-500 to-red-500',
+                icon: '🔬'
+              }
+            ];
+
+            const criticalThinking = [
+              {
+                question: '¿La IA siempre tiene razón?',
+                answer: 'No. La IA puede generar información incorrecta o desactualizada. Por eso siempre debemos verificar con fuentes confiables.'
+              },
+              {
+                question: '¿Cómo sabemos si la información es confiable?',
+                answer: 'Contrastando con múltiples fuentes, preguntando a expertos, y usando nuestro pensamiento crítico para evaluar si la respuesta tiene sentido científico.'
+              },
+              {
+                question: '¿La IA reemplaza al profesor?',
+                answer: 'No. La IA es una herramienta de apoyo, pero el profesor guía el proceso de aprendizaje, ayuda a interpretar la información y desarrolla nuestro pensamiento crítico.'
+              },
+              {
+                question: '¿Qué aprendemos al usar IA conscientemente?',
+                answer: 'Aprendemos a formular mejores preguntas, a evaluar información críticamente, a verificar fuentes, y a ser usuarios responsables de la tecnología.'
+              }
+            ];
+
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
+                <div className="container mx-auto px-4 py-8 max-w-4xl">
+                  <button
+                    onClick={() => setCurrentView('home')}
+                    className="flex items-center text-cyan-300 hover:text-cyan-400 mb-6 transition-colors"
+                  >
+                    <span style={{fontSize: '1.2rem', marginRight: '0.5rem'}}>🏠</span>
+                    <span>Volver al inicio</span>
+                  </button>
+
+                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 mb-8">
+                    <h1 className="text-3xl font-bold mb-2 flex items-center">
+                      <span style={{fontSize: '2rem', marginRight: '0.75rem'}}>🧠</span>
+                      Proceso de Metacognición
+                    </h1>
+                    <p className="text-purple-100">
+                      Cómo pensamos sobre nuestro propio aprendizaje y validamos la información
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-6 md:p-8 mb-8 border border-slate-700">
+                    <h2 className="text-2xl font-semibold mb-4 text-cyan-300">¿Qué es la Metacognición?</h2>
+                    <p className="text-slate-200 leading-relaxed mb-4">
+                      La metacognición es "pensar sobre cómo pensamos". Es ser conscientes de nuestro propio proceso de aprendizaje, reflexionar sobre qué estrategias usamos para entender algo nuevo, y evaluar si esas estrategias están funcionando.
+                    </p>
+                    <p className="text-slate-200 leading-relaxed">
+                      En el contexto de usar Inteligencia Artificial para aprender, la metacognición es especialmente importante porque nos ayuda a no aceptar pasivamente la información que nos da una máquina, sino a cuestionarla, verificarla y construir conocimiento real.
+                    </p>
+                  </div>
+
+                  <h2 className="text-2xl font-bold mb-6 text-center">Nuestro Proceso de Aprendizaje con IA</h2>
+
+                  <div className="space-y-6 mb-8">
+                    {metacognitionSteps.map((step) => (
+                      <div
+                        key={step.number}
+                        className={`bg-gradient-to-br ${step.color} rounded-2xl p-6 transform transition-all hover:scale-105`}
+                      >
+                        <div className="flex items-start">
+                          <div style={{fontSize: '2.5rem', marginRight: '1rem'}}>{step.icon}</div>
+                          <div className="flex-1">
+                            <div className="flex items-center mb-2">
+                              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold mr-3">
+                                {step.number}
+                              </div>
+                              <h3 className="text-xl font-bold">{step.title}</h3>
+                            </div>
+                            <p className="text-white/90 leading-relaxed">{step.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-6 md:p-8 border border-slate-700">
+                    <h2 className="text-2xl font-semibold mb-6 text-pink-300">Pensamiento Crítico y Uso Ético de la IA</h2>
+                    <p className="text-slate-200 leading-relaxed mb-6">
+                      Usar IA de manera responsable significa hacernos preguntas constantemente sobre la información que recibimos y nuestro proceso de aprendizaje. Aquí hay algunas reflexiones importantes:
+                    </p>
+
+                    <div className="space-y-4">
+                      {criticalThinking.map((item, idx) => (
+                        <div key={idx} className="bg-slate-900/50 rounded-xl p-5 border border-slate-700">
+                          <h3 className="text-lg font-semibold text-cyan-300 mb-2">{item.question}</h3>
+                          <p className="text-slate-200 leading-relaxed">{item.answer}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 bg-gradient-to-r from-amber-900/50 to-orange-900/50 rounded-xl p-5 border border-amber-500/30">
+                      <h3 className="text-lg font-semibold text-amber-300 mb-2 flex items-center">
+                        <span style={{fontSize: '1.25rem', marginRight: '0.5rem'}}>💡</span>
+                        Principio fundamental
+                      </h3>
+                      <p className="text-amber-100 leading-relaxed">
+                        La IA es una herramienta poderosa, pero nunca debe reemplazar tu capacidad de pensar, cuestionar y aprender. El verdadero aprendizaje ocurre cuando usas la IA como punto de partida para la investigación, no como punto final. Tu curiosidad, creatividad y pensamiento crítico son insustituibles.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+          // Renderizado principal
+          if (selectedStation) {
+            return <StationDetail />;
+          }
+
+          switch (currentView) {
+            case 'stations':
+              return <StationsView />;
+            case 'chatbot':
+              return <ChatbotView />;
+            case 'metacognition':
+              return <MetacognitionView />;
+            default:
+              return <HomeView />;
+          }
+        }
+
+        // Renderizar la aplicación
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<NaturIAApp />);
+
+        // Registrar service worker para PWA
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker
+              .register('service-worker.js')
+              .then(registration => console.log('Service Worker registrado'))
+              .catch(err => console.log('Error al registrar Service Worker:', err));
+          });
+        }
+    </script>
 </body>
 </html>
