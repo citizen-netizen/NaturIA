@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="NaturIA: aprende Ciencias Naturales con inteligencia artificial y pensamiento critico. Feria de la Ciencia, I.E. Luis Andrade Valderrama, Giraldo, Antioquia."
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="NaturIA" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- La barra del navegador acompaña al tema elegido. -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0d6d63" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#12181f" />
+
+    <!-- %BASE_URL% lo sustituye Vite por la ruta de publicación. -->
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%icons/favicon.svg" />
+    <link rel="apple-touch-icon" href="%BASE_URL%icons/apple-touch-icon.png" />
+
+    <title>NaturIA - Ciencias Naturales con IA</title>
+
+    <script>
+      // Se aplica el tema antes del primer pintado para que no haya un
+      // destello claro al abrir la app en modo oscuro.
+      ;(() => {
+        try {
+          const saved = localStorage.getItem('naturia:theme')
+          const theme =
+            saved === 'light' || saved === 'dark'
+              ? saved
+              : matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+          document.documentElement.dataset.theme = theme
+        } catch {
+          document.documentElement.dataset.theme = 'light'
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

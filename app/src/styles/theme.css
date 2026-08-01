@@ -1,0 +1,226 @@
+@import 'tailwindcss';
+
+/*
+  Sistema de diseño de NaturIA.
+
+  Todo el color se declara una sola vez como token semantico (`canvas`,
+  `surface`, `ink`, `brand`...) y cada token tiene un valor claro y uno
+  oscuro. Los componentes nunca escriben `dark:` para el color: usan
+  `bg-surface` o `text-ink` y el tema se resuelve solo. Eso evita que el
+  modo oscuro se degrade a medida que se agregan pantallas.
+
+  El nombre del proyecto marca la paleta: verde (natura) como color de
+  marca, violeta (IA) como color de la maquina. Cada estacion tiene ademas
+  su propio matiz.
+*/
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Outfit Variable', 'Inter Variable', ui-sans-serif, sans-serif;
+
+  --color-canvas: var(--n-canvas);
+  --color-surface: var(--n-surface);
+  --color-raised: var(--n-raised);
+  --color-line: var(--n-line);
+  --color-line-strong: var(--n-line-strong);
+
+  --color-ink: var(--n-ink);
+  --color-ink-2: var(--n-ink-2);
+  --color-ink-3: var(--n-ink-3);
+
+  --color-brand: var(--n-brand);
+  --color-brand-hover: var(--n-brand-hover);
+  --color-on-brand: var(--n-on-brand);
+  --color-brand-soft: var(--n-brand-soft);
+
+  --color-ai: var(--n-ai);
+  --color-ai-soft: var(--n-ai-soft);
+
+  --color-danger: var(--n-danger);
+  --color-danger-soft: var(--n-danger-soft);
+  --color-warn: var(--n-warn);
+  --color-warn-soft: var(--n-warn-soft);
+  --color-ok: var(--n-ok);
+
+  /* Matices por estacion: `fg` para texto/iconos, `soft` para fondos. */
+  --color-violet: var(--n-violet);
+  --color-violet-soft: var(--n-violet-soft);
+  --color-cyan: var(--n-cyan);
+  --color-cyan-soft: var(--n-cyan-soft);
+  --color-green: var(--n-green);
+  --color-green-soft: var(--n-green-soft);
+  --color-amber: var(--n-amber);
+  --color-amber-soft: var(--n-amber-soft);
+
+  --radius-card: 1rem;
+  --radius-pill: 999px;
+
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.05), 0 4px 12px oklch(0 0 0 / 0.05);
+  --shadow-lift: 0 2px 4px oklch(0 0 0 / 0.06), 0 12px 28px oklch(0 0 0 / 0.1);
+}
+
+:root {
+  --n-canvas: oklch(0.985 0.004 240);
+  --n-surface: oklch(1 0 0);
+  --n-raised: oklch(0.975 0.005 240);
+  --n-line: oklch(0.91 0.006 250);
+  --n-line-strong: oklch(0.84 0.008 250);
+
+  --n-ink: oklch(0.24 0.02 255);
+  --n-ink-2: oklch(0.44 0.018 255);
+  --n-ink-3: oklch(0.53 0.016 255);
+
+  --n-brand: oklch(0.52 0.115 172);
+  --n-brand-hover: oklch(0.46 0.115 172);
+  --n-on-brand: oklch(1 0 0);
+  --n-brand-soft: oklch(0.95 0.03 172);
+
+  --n-ai: oklch(0.5 0.19 300);
+  --n-ai-soft: oklch(0.96 0.03 300);
+
+  --n-danger: oklch(0.52 0.19 25);
+  --n-danger-soft: oklch(0.96 0.03 25);
+  --n-warn: oklch(0.5 0.12 70);
+  --n-warn-soft: oklch(0.96 0.04 80);
+  --n-ok: oklch(0.52 0.13 155);
+
+  --n-violet: oklch(0.5 0.19 300);
+  --n-violet-soft: oklch(0.96 0.03 300);
+  --n-cyan: oklch(0.5 0.13 235);
+  --n-cyan-soft: oklch(0.96 0.03 235);
+  --n-green: oklch(0.48 0.13 155);
+  --n-green-soft: oklch(0.95 0.04 155);
+  --n-amber: oklch(0.5 0.12 65);
+  --n-amber-soft: oklch(0.96 0.04 75);
+}
+
+[data-theme='dark'] {
+  --n-canvas: oklch(0.17 0.014 260);
+  --n-surface: oklch(0.215 0.016 260);
+  --n-raised: oklch(0.26 0.018 260);
+  --n-line: oklch(0.32 0.016 260);
+  --n-line-strong: oklch(0.42 0.018 260);
+
+  --n-ink: oklch(0.96 0.004 260);
+  --n-ink-2: oklch(0.81 0.012 260);
+  --n-ink-3: oklch(0.69 0.014 260);
+
+  --n-brand: oklch(0.76 0.12 172);
+  --n-brand-hover: oklch(0.82 0.12 172);
+  --n-on-brand: oklch(0.19 0.03 172);
+  --n-brand-soft: oklch(0.3 0.05 172);
+
+  --n-ai: oklch(0.76 0.14 300);
+  --n-ai-soft: oklch(0.3 0.06 300);
+
+  --n-danger: oklch(0.72 0.15 25);
+  --n-danger-soft: oklch(0.31 0.07 25);
+  --n-warn: oklch(0.79 0.12 80);
+  --n-warn-soft: oklch(0.31 0.06 80);
+  --n-ok: oklch(0.76 0.13 155);
+
+  --n-violet: oklch(0.76 0.14 300);
+  --n-violet-soft: oklch(0.3 0.06 300);
+  --n-cyan: oklch(0.76 0.11 235);
+  --n-cyan-soft: oklch(0.3 0.05 235);
+  --n-green: oklch(0.76 0.13 155);
+  --n-green-soft: oklch(0.29 0.05 155);
+  --n-amber: oklch(0.8 0.12 75);
+  --n-amber-soft: oklch(0.3 0.05 75);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* El chat va anclado abajo: hay que respetar la barra del iPhone. */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  /*
+    Un anillo de foco visible y consistente. El proyecto anterior hacia
+    `focus:outline-none` sin reemplazo, lo que dejaba la app inservible
+    con teclado.
+  */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--color-brand-soft);
+    color: var(--color-ink);
+  }
+}
+
+@layer utilities {
+  /* Malla decorativa del encabezado; puramente ornamental. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, var(--color-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+
+  .animate-rise {
+    animation: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-blink {
+    animation: blink 1s steps(2, start) infinite;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/*
+  Accesibilidad: quien pidio menos movimiento no deberia recibir ninguno.
+  Las animaciones del proyecto anterior ignoraban esta preferencia.
+*/
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

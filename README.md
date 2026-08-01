@@ -1,155 +1,175 @@
-# NaturIA - Aplicación Educativa de IA para Ciencias Naturales
+# NaturIA
 
-## Descripción del Proyecto
+Aplicación web educativa de Ciencias Naturales con inteligencia artificial real, para la Feria de la Ciencia de la **Institución Educativa Luis Andrade Valderrama** (Giraldo, Antioquia).
 
-NaturIA es una aplicación web progresiva (PWA) diseñada para el proyecto de Feria de la Ciencia de la Institución Educativa Luis Andrade Valderrama de Giraldo, Antioquia. Esta aplicación combina el poder de la Inteligencia Artificial con conceptos fundamentales de Ciencias Naturales, promoviendo un aprendizaje crítico y reflexivo.
-
-## Características Principales
-
-La aplicación incluye tres componentes fundamentales que responden a los objetivos del proyecto educativo:
-
-### 1. Estaciones Interactivas
-Cuatro estaciones temáticas que cubren conceptos complejos de Ciencias Naturales:
-
-**El Código de la Vida (Genética)**: Explora la herencia genética, enfermedades hereditarias como el daltonismo, y cómo los genes determinan nuestras características. Los estudiantes aprenderán sobre cromosomas, genes dominantes y recesivos, y patrones de herencia ligados al sexo.
-
-**Zoom Atómico (Química Molecular)**: Descubre la estructura de la materia a nivel microscópico. Los visitantes pueden explorar cómo los átomos forman moléculas como el agua (H₂O), entender enlaces químicos, y visualizar estructuras tridimensionales que determinan las propiedades de las sustancias.
-
-**Ecosistemas del Futuro (Biodiversidad)**: Sumérgete en los ecosistemas colombianos únicos como páramos, selvas amazónicas y arrecifes de coral. Aprende sobre biodiversidad, interdependencia de especies, y los efectos del cambio climático en estos delicados equilibrios.
-
-**Newton en Acción (Física)**: Experimenta con las tres leyes de Newton que gobiernan el movimiento. Los estudiantes pueden relacionar conceptos abstractos de física con situaciones cotidianas como viajar en bus, jugar deportes o caminar.
-
-### 2. Chatbot Educativo Inteligente
-Un asistente conversacional diseñado específicamente para responder preguntas sobre los cuatro temas principales del proyecto. El chatbot incluye una funcionalidad educativa única: una guía interactiva sobre cómo crear prompts efectivos. Los estudiantes aprenden la diferencia entre preguntas vagas ("Dime sobre genética") y prompts bien estructurados ("Explícame cómo funciona la herencia del daltonismo usando un ejemplo de árbol genealógico").
-
-El chatbot proporciona respuestas educativas detalladas adaptadas al nivel de estudiantes de secundaria, usando analogías comprensibles y ejemplos locales cuando es apropiado. Cada respuesta incluye una invitación a profundizar más, fomentando la curiosidad científica.
-
-### 3. Proceso de Metacognición
-Esta sección implementa el modelo de pensamiento crítico del proyecto original, mostrando los cuatro pasos del proceso de aprendizaje con IA:
-
-**Paso 1 - Nuestra duda era**: Los estudiantes identifican qué no comprenden o qué desean investigar, formulando una pregunta clara de investigación.
-
-**Paso 2 - Le pedimos a la IA que**: Se diseña un prompt específico y bien estructurado, aplicando las técnicas aprendidas en la guía de prompts del chatbot.
-
-**Paso 3 - La IA nos respondió**: Se recibe y analiza la respuesta generada por la inteligencia artificial, identificando los conceptos clave y la información proporcionada.
-
-**Paso 4 - Nosotros lo comprobamos/complementamos con**: Se verifica la información usando fuentes confiables, experimentos físicos, consultas con el profesor, y pensamiento crítico para validar o complementar lo aprendido.
-
-La sección también incluye reflexiones sobre el uso ético y responsable de la IA, respondiendo preguntas fundamentales como "¿La IA siempre tiene razón?", "¿La IA reemplaza al profesor?", y "¿Qué aprendemos al usar IA conscientemente?".
-
-## Características Técnicas (PWA)
-
-Esta es una aplicación web progresiva completa, lo que significa que puede instalarse en cualquier dispositivo Android (o iOS, o computadora) y funcionar como una aplicación nativa. Las características técnicas incluyen:
-
-**Instalación en pantalla de inicio**: Los usuarios pueden agregar un ícono de NaturIA directamente a la pantalla de inicio de su teléfono, permitiendo acceso rápido sin abrir el navegador.
-
-**Funcionamiento sin conexión**: Una vez instalada, la aplicación funciona completamente sin conexión a internet gracias al service worker que cachea todos los recursos necesarios.
-
-**Diseño responsivo**: La interfaz se adapta perfectamente a cualquier tamaño de pantalla, desde teléfonos móviles pequeños hasta tablets y computadoras de escritorio.
-
-**Experiencia de pantalla completa**: Al abrirse desde el ícono de inicio, la aplicación ocupa toda la pantalla sin mostrar las barras del navegador, proporcionando una experiencia inmersiva similar a una app nativa.
-
-**Rendimiento optimizado**: La aplicación carga rápidamente y responde de manera fluida gracias al uso de React y técnicas de optimización de rendimiento.
-
-## Cómo Usar la Aplicación en la Feria
-
-### Para los Organizadores
-
-1. **Descargar los archivos**: Todos los archivos necesarios (index.html, manifest.json, service-worker.js) están listos para usar.
-
-2. **Alojar la aplicación**: Tienen tres opciones principales para hacer que la aplicación sea accesible durante la feria:
-
-   **Opción A - GitHub Pages (Recomendada, Gratuita)**:
-   - Crear una cuenta gratuita en GitHub si aún no tienen una
-   - Crear un nuevo repositorio público llamado "naturia"
-   - Subir todos los archivos al repositorio
-   - Ir a Settings → Pages y activar GitHub Pages desde la rama main
-   - En unos minutos tendrán una URL como: https://tu-usuario.github.io/naturia/
-   - Esta URL funcionará desde cualquier dispositivo con internet
-
-   **Opción B - Netlify (Gratuita, Muy Fácil)**:
-   - Ir a netlify.com y crear una cuenta gratuita
-   - Hacer clic en "Add new site" → "Deploy manually"
-   - Arrastrar la carpeta con todos los archivos
-   - Netlify generará una URL automáticamente que pueden compartir
-
-   **Opción C - Servidor Local (Sin Internet)**:
-   - Si la feria no tiene buena conexión a internet, pueden usar un servidor local
-   - En una computadora con Python instalado, navegar a la carpeta con los archivos
-   - Ejecutar: `python -m http.server 8000`
-   - Los dispositivos móviles en la misma red WiFi podrán acceder usando la IP de la computadora
-
-3. **Crear código QR**: Una vez tengan la URL, generar un código QR usando cualquier generador en línea (como qr-code-generator.com). Imprimir este código QR en tamaño grande para colocarlo en el stand de la feria.
-
-4. **Preparar dispositivos de demostración**: Si es posible, tener 1-2 tablets o teléfonos con la aplicación ya instalada para que los visitantes puedan interactuar sin usar sus propios dispositivos.
-
-### Para los Visitantes de la Feria
-
-1. **Acceder a la aplicación**:
-   - Escanear el código QR con la cámara del teléfono
-   - O visitar directamente la URL proporcionada por los organizadores
-   - La aplicación se abrirá inmediatamente en el navegador
-
-2. **Instalar en el teléfono (Opcional pero recomendado)**:
-   
-   **En Android**:
-   - Una vez abierta la aplicación en Chrome, aparecerá un mensaje emergente en la parte inferior que dice "Agregar a la pantalla de inicio"
-   - Si no aparece, tocar el menú de tres puntos (⋮) en la esquina superior derecha
-   - Seleccionar "Agregar a la pantalla de inicio" o "Instalar aplicación"
-   - Confirmar la instalación
-   - ¡Listo! Ahora tendrán un ícono de NaturIA en su pantalla de inicio
-
-   **En iPhone/iPad**:
-   - Abrir la aplicación en Safari (debe ser Safari, no funciona en Chrome para iOS)
-   - Tocar el botón de compartir (el cuadrado con flecha hacia arriba)
-   - Desplazarse hacia abajo y tocar "Agregar a la pantalla de inicio"
-   - Confirmar
-   - El ícono aparecerá en la pantalla de inicio
-
-3. **Explorar la aplicación**:
-   - Desde la pantalla principal, elegir entre tres opciones: explorar las estaciones interactivas, usar el chatbot educativo, o aprender sobre el proceso de metacognición
-   - En cada estación, leer la introducción, revisar los conceptos clave, y luego opcionalmente ir al chatbot para hacer preguntas específicas
-   - En el chatbot, hacer clic en "Guía: Cómo hacer buenos prompts" para aprender a formular mejores preguntas antes de empezar a interactuar
-   - Explorar la sección de metacognición para entender el proceso completo de aprendizaje crítico con IA
-
-## Consejos para la Presentación en la Feria
-
-**Preparar un guion de presentación**: Los estudiantes encargados de cada estación deben preparar una breve explicación de 2-3 minutos sobre su tema, que puede complementar con la información en la aplicación.
-
-**Demostración en vivo del chatbot**: Mostrar a los visitantes cómo hacer una pregunta vaga primero y luego mostrar cómo mejorarla usando las técnicas de la guía de prompts, demostrando así la diferencia en calidad de las respuestas.
-
-**Conectar lo físico con lo digital**: Si tienen maquetas, experimentos o materiales físicos complementarios (como se sugiere en el proyecto original), usar la aplicación para proporcionar información adicional que complementa lo que los visitantes pueden tocar y ver.
-
-**Énfasis en pensamiento crítico**: Usar la sección de metacognición para liderar una discusión sobre cómo NO confiar ciegamente en la IA, mostrando ejemplos de cómo verificaron la información y por qué es importante hacerlo.
-
-**Recopilar feedback**: Pedir a los visitantes que compartan qué estación les gustó más y por qué, o qué aprend ieron nuevo. Esta retroalimentación puede ser valiosa para el informe final del proyecto.
-
-## Estructura de Archivos
-
-El proyecto consiste en tres archivos principales que trabajan juntos:
-
-**index.html**: Es el archivo principal que contiene toda la estructura y lógica de la aplicación. Incluye el código HTML, el componente React completo, y todos los estilos necesarios. Este archivo es completamente autosuficiente y puede funcionar por sí solo.
-
-**manifest.json**: Define cómo se comporta la aplicación cuando se instala como PWA. Especifica el nombre, los íconos, los colores del tema, y otras configuraciones que hacen que la aplicación se vea y funcione como una app nativa.
-
-**service-worker.js**: Maneja el funcionamiento sin conexión. Este archivo JavaScript se ejecuta en segundo plano y cachea todos los recursos necesarios para que la aplicación funcione incluso cuando no hay internet disponible.
-
-## Soporte y Personalización
-
-Esta aplicación está diseñada para ser modificable. Si desean agregar más contenido a las estaciones, cambiar los ejemplos del chatbot, o incluir información adicional en la sección de metacognición, pueden editar directamente el archivo index.html. El código está comentado y organizado de manera clara para facilitar las modificaciones.
-
-Si necesitan ayuda técnica o quieren agregar funcionalidades adicionales, pueden volver a consultar con quien les ayudó a crear esta aplicación. Algunas posibles extensiones futuras podrían incluir la integración con APIs de IA reales, la adición de más estaciones temáticas, o la inclusión de videos y animaciones educativas.
-
-## Licencia y Créditos
-
-Esta aplicación fue creada específicamente para el proyecto "NaturIA: uso de aplicaciones basadas en IA para la comprensión de conceptos en Ciencias Naturales" de la Institución Educativa Luis Andrade Valderrama, Giraldo, Antioquia.
-
-Los estudiantes y docentes son libres de usar, modificar y compartir esta aplicación para propósitos educativos.
-
-## Contacto
-
-Para soporte técnico o preguntas sobre la aplicación, contactar a los docentes responsables del proyecto en la Institución Educativa Luis Andrade Valderrama.
+Los visitantes escanean un código QR en el stand, la app se abre en su celular y pueden conversar con un tutor de IA especializado en cada estación, poner a prueba sus propios prompts, y entender por qué nunca hay que creerle a la IA a la primera.
 
 ---
 
-¡Éxitos en la Feria de la Ciencia! Este proyecto representa un uso innovador y crítico de la tecnología para el aprendizaje de las ciencias naturales.
+## Qué hace
+
+**Cuatro estaciones.** Genética, química molecular, ecosistemas colombianos y las leyes de Newton. Cada una con sus conceptos clave y su propio tutor.
+
+**Tutor con IA de verdad.** Conversación con respuesta en streaming, palabra por palabra, a través de un modelo servido por OpenRouter. Cada estación tiene su propio *system prompt*: el tutor de Newton parte de situaciones cotidianas, el de ecosistemas prioriza el páramo y el bosque andino.
+
+**Laboratorio de Prompts.** El estudiante escribe el prompt que le haría a una IA y esta se lo califica de 0 a 100 sobre cuatro criterios (claridad, especificidad, contexto y formato), le dice qué mejorar y se lo devuelve reescrito. Es el ejercicio central del proyecto: aprender a preguntar, no solo a recibir respuestas.
+
+**Metacognición.** Los cuatro pasos del proceso de verificación y las preguntas de pensamiento crítico sobre el uso ético de la IA.
+
+**Funciona sin internet.** Si no hay conexión en la feria —o si se agota la cuota del día— el tutor responde desde una base de conocimiento guardada en el teléfono, y lo dice con una insignia visible: *"Sin conexión · base local"*. Nunca se hace pasar una respuesta enlatada por una generada.
+
+---
+
+## Cómo está organizado
+
+```
+app/       PWA en React + TypeScript, construida con Vite
+worker/    Worker de Cloudflare que hace de proxy de OpenRouter
+```
+
+Son dos piezas que se despliegan por separado: la app a GitHub Pages y el Worker a Cloudflare.
+
+### Por qué hace falta un backend
+
+**La API key de OpenRouter no puede ir en la aplicación.** El sitio es público y su código fuente se lee con dos clics; cualquiera podría copiar la llave y gastar la cuenta del colegio. Por eso existe el Worker: la llave vive solo ahí, como secreto de Cloudflare, y el navegador nunca la ve.
+
+El Worker además protege el presupuesto, algo que importa cuando la dirección del servicio va impresa en un cartel:
+
+- **CORS** restringido al dominio de la app.
+- **Límite por ráfaga:** 8 peticiones por minuto y por dispositivo.
+- **Presupuesto diario** para todo el sitio, contado en KV. Al agotarse, la app degrada a la base local en vez de romperse.
+- **Límites de entrada:** largo del mensaje, turnos de historial y tokens de salida.
+- El cliente **nunca elige el modelo ni el system prompt**: solo manda el identificador de la estación.
+
+---
+
+## Ponerlo a andar en tu computador
+
+Hace falta Node 22 o superior.
+
+```bash
+# 1. El backend
+cd worker
+npm install
+cp .dev.vars.example .dev.vars     # y pega tu API key de OpenRouter
+npm run dev                        # queda en http://localhost:8787
+
+# 2. La app, en otra terminal
+cd app
+npm install
+echo "VITE_API_URL=http://localhost:8787" > .env.local
+echo "VITE_BASE=/" >> .env.local
+npm run dev                        # queda en http://localhost:5173
+```
+
+Para comprobar que el backend responde:
+
+```bash
+curl http://localhost:8787/api/health
+```
+
+---
+
+## Publicarlo
+
+### 1. El Worker (Cloudflare)
+
+Necesitas una cuenta gratuita en Cloudflare.
+
+```bash
+cd worker
+npx wrangler login
+
+# Crea el almacén donde se lleva la cuenta del presupuesto diario
+npx wrangler kv namespace create BUDGET
+# Copia el id que imprime y pégalo en wrangler.jsonc, en kv_namespaces[0].id
+
+# Carga la llave. Queda guardada en Cloudflare, nunca en el repositorio.
+npx wrangler secret put OPENROUTER_API_KEY
+
+npx wrangler deploy
+```
+
+Anota la URL que devuelve (algo como `https://naturia-api.tu-cuenta.workers.dev`) y ajusta en `wrangler.jsonc`:
+
+- `ALLOWED_ORIGINS`: el dominio de la app, sin barra final.
+- `DAILY_BUDGET`: cuántas consultas al modelo permites por día.
+- `MODEL`: debe ser uno de la lista blanca de `worker/src/openrouter.ts`.
+
+### 2. La app (GitHub Pages)
+
+1. En **Settings → Pages**, cambia *Source* a **GitHub Actions**. Este paso es manual y sin él no se publica nada.
+2. En **Settings → Secrets and variables → Actions → Variables**, crea la variable `VITE_API_URL` con la URL del Worker.
+3. Empuja a `main`. El workflow construye y publica solo.
+
+Queda en `https://citizen-netizen.github.io/NaturIA/`. Genera el QR con esa dirección.
+
+> Las rutas de GitHub Pages distinguen mayúsculas: el repositorio se llama `NaturIA`, así que `/naturia/` daría 404. Si algún día usan dominio propio, se construye con `VITE_BASE=/`.
+
+### 3. Despliegue automático del Worker (opcional)
+
+Si añades los secretos `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID` al repositorio, el Worker también se despliega solo al tocar `worker/`. Sin esos secretos el workflow no falla: simplemente se salta ese paso.
+
+---
+
+## Antes de la feria: decidan la cuota
+
+Esto hay que resolverlo con tiempo, porque condiciona la experiencia del stand.
+
+El nivel gratuito de OpenRouter permite **50 peticiones al día** si la cuenta tiene saldo bajo, y **20 por minuto** en los modelos con sufijo `:free`. Una feria con varias decenas de visitantes se come 50 peticiones en la primera media hora, y a partir de ahí todos verían respuestas de la base local.
+
+Dos caminos:
+
+- **Comprar 10 USD una sola vez.** Los créditos no expiran y el tope diario sube a 1000 peticiones. Es la opción recomendada.
+- **Usar un modelo de pago barato** y fijar `DAILY_BUDGET` según lo que estén dispuestos a gastar.
+
+En cualquier caso, `DAILY_BUDGET` es el freno de mano: cuando se alcanza, el Worker deja de llamar al modelo y la app sigue funcionando con su base local.
+
+### Comprobar el estado antes de abrir el stand
+
+```bash
+curl https://TU-WORKER.workers.dev/api/health
+```
+
+Si responde `"configured": true`, el tutor está listo.
+
+---
+
+## Cómo usarla en el stand
+
+**Preparación.** Imprime el QR en grande. Ten uno o dos teléfonos con la app ya instalada para quien no quiera usar el suyo.
+
+**Instalarla.** En Android, Chrome ofrece "Instalar aplicación" desde el menú de tres puntos. En iPhone hay que abrirla en Safari y usar Compartir → "Agregar a la pantalla de inicio". Una vez instalada arranca sin conexión.
+
+**La demostración que mejor funciona.** Abre el Laboratorio de Prompts y escribe delante del visitante un prompt vago como *"dime sobre genética"*. Deja que la IA lo califique bajo. Luego usa el prompt reescrito que ella misma propone y muéstrale la diferencia en la respuesta del tutor. Ahí se ve, en vivo, de qué trata el proyecto.
+
+**El cierre.** Lleva la conversación a la sección de metacognición: la IA se equivoca, y lo importante no es la respuesta sino cómo la verificamos.
+
+---
+
+## Notas técnicas
+
+Lo que cambió respecto de la primera versión del proyecto, por si alguien retoma el código:
+
+- **El chatbot anterior no usaba IA.** Era una cadena de comparaciones de texto (`if (pregunta.includes('genetica'))`) que devolvía párrafos fijos. Esos textos no se perdieron: hoy son la base de conocimiento offline de `app/src/data/offlineKnowledge.ts`, que es el papel que sí les corresponde, y siempre se muestran etiquetados.
+- **Se eliminó la transpilación en el navegador.** La versión anterior cargaba React, Babel y Tailwind desde CDN y compilaba el JSX en cada visita: alrededor de 1,5 MB de JavaScript antes de dibujar nada. Ahora se compila una sola vez y el paquete ronda los 100 KB comprimidos, con las fuentes reducidas al subconjunto latino.
+- **La app tiene rutas de verdad**, así que el botón "atrás" del teléfono funciona y se pueden compartir enlaces a una estación concreta.
+- **Modo claro y oscuro**, contraste AA, foco visible por teclado y respeto a `prefers-reduced-motion`.
+- **El service worker se rehizo con Workbox.** El anterior devolvía el `index.html` ante cualquier petición fallida, lo que habría entregado HTML a las llamadas de la API. Ahora las rutas de `/api/` están excluidas explícitamente.
+
+### Comandos útiles
+
+```bash
+cd app    && npm run build      # compila y verifica tipos
+cd app    && npm run preview    # sirve el build, con service worker activo
+cd worker && npm run typecheck
+cd worker && npm run tail       # registros del Worker en producción
+```
+
+---
+
+## Créditos
+
+Proyecto *"NaturIA: uso de aplicaciones basadas en IA para la comprensión de conceptos en Ciencias Naturales"*, Institución Educativa Luis Andrade Valderrama, Giraldo, Antioquia.
+
+Estudiantes y docentes pueden usar, modificar y compartir esta aplicación libremente con fines educativos.
