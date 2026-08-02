@@ -29,7 +29,14 @@
   "kv_namespaces": [
     {
       "binding": "BUDGET",
-      // Reemplazar con el id real que devuelve:
+      // Este marcador se queda tal cual en el repositorio a proposito.
+      //
+      // El workflow `.github/workflows/deploy-worker.yml` crea el almacen si
+      // hace falta y sustituye este valor por el id real durante el
+      // despliegue, sin commitear nada. Asi el montaje completo se puede
+      // hacer desde el navegador de un celular.
+      //
+      // Solo hay que reemplazarlo a mano si se despliega desde una terminal:
       //   npx wrangler kv namespace create BUDGET
       "id": "REEMPLAZAR_CON_EL_ID_DE_KV"
     }

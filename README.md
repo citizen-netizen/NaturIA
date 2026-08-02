@@ -72,9 +72,50 @@ curl http://localhost:8787/api/health
 
 ## Publicarlo
 
-### 1. El Worker (Cloudflare)
+### 1. La app (GitHub Pages)
 
-Necesitas una cuenta gratuita en Cloudflare.
+1. En **Settings → Pages**, cambia *Source* a **GitHub Actions**. Este paso es manual y sin él no se publica nada.
+2. Empuja a `main`. El workflow construye y publica solo.
+
+Queda en `https://citizen-netizen.github.io/NaturIA/`. Genera el QR con esa dirección.
+
+> Las rutas de GitHub Pages distinguen mayúsculas: el repositorio se llama `NaturIA`, así que `/naturia/` daría 404. Si algún día usan dominio propio, se construye con `VITE_BASE=/`.
+
+Con esto la app ya funciona, pero el tutor responderá siempre desde su base local. Para que use IA hace falta el Worker.
+
+### 2. El Worker de IA, desde el navegador
+
+**No necesitas terminal.** El workflow crea el almacén KV, despliega el Worker y carga la API key por ti. Todo se puede hacer desde un celular.
+
+Necesitas una cuenta gratuita de Cloudflare y una API key de OpenRouter.
+
+**En el panel de Cloudflare:**
+
+1. Ve a **My Profile → API Tokens → Create Token** y usa la plantilla **Edit Cloudflare Workers**. Esa plantilla ya incluye los permisos de Workers Scripts y de Workers KV Storage, que son los dos que hacen falta. Copia el token: solo se muestra una vez.
+2. En la página de inicio de tu cuenta, copia el **Account ID**.
+
+**En GitHub → Settings → Secrets and variables → Actions**, pestaña **Secrets**, crea tres:
+
+| Secreto | De dónde sale |
+|---|---|
+| `CLOUDFLARE_API_TOKEN` | el token del paso 1 |
+| `CLOUDFLARE_ACCOUNT_ID` | el Account ID del paso 2 |
+| `OPENROUTER_API_KEY` | tu cuenta de OpenRouter |
+
+**Luego:**
+
+3. Ve a **Actions → Desplegar el Worker de IA → Run workflow**.
+4. Cuando termine, abre el run: en el resumen aparece la URL del Worker, algo como `https://naturia-api.tu-cuenta.workers.dev`.
+5. En **Variables** (la otra pestaña, no Secrets), crea `VITE_API_URL` con esa URL.
+6. Ve a **Actions → Desplegar la app a GitHub Pages → Run workflow**.
+
+> **El paso 6 no es opcional.** Crear o cambiar una variable **no dispara ningún despliegue** por sí sola. Si te saltas ese paso, `VITE_API_URL` no entra en la compilación y el tutor seguirá respondiendo desde la base local aunque el Worker esté perfecto. Es el tropiezo más fácil de todo el montaje.
+
+Para comprobar que quedó bien, abre `https://TU-WORKER.workers.dev/api/health`. Debe decir `"configured": true`.
+
+### 3. El Worker desde una terminal (alternativa)
+
+Si prefieres hacerlo a mano:
 
 ```bash
 cd worker
@@ -82,33 +123,24 @@ npx wrangler login
 
 # Crea el almacén donde se lleva la cuenta del presupuesto diario
 npx wrangler kv namespace create BUDGET
-# Copia el id que imprime y pégalo en wrangler.jsonc, en kv_namespaces[0].id
-
-# Carga la llave. Queda guardada en Cloudflare, nunca en el repositorio.
-npx wrangler secret put OPENROUTER_API_KEY
+# Copia el id que imprime y pégalo en wrangler.jsonc, en kv_namespaces[0].id,
+# reemplazando REEMPLAZAR_CON_EL_ID_DE_KV
 
 npx wrangler deploy
+
+# La llave queda en Cloudflare, nunca en el repositorio
+npx wrangler secret put OPENROUTER_API_KEY
 ```
 
-Anota la URL que devuelve (algo como `https://naturia-api.tu-cuenta.workers.dev`) y ajusta en `wrangler.jsonc`:
+### Ajustes del Worker
 
-- `ALLOWED_ORIGINS`: el dominio de la app, sin barra final.
-- `DAILY_BUDGET`: cuántas consultas al modelo permites por día.
+En `worker/wrangler.jsonc`, dentro de `vars`:
+
+- `ALLOWED_ORIGINS`: los orígenes autorizados, separados por coma y sin barra final.
+- `DAILY_BUDGET`: cuántas consultas al modelo se permiten por día en todo el sitio.
 - `MODEL`: debe ser uno de la lista blanca de `worker/src/openrouter.ts`.
 
-### 2. La app (GitHub Pages)
-
-1. En **Settings → Pages**, cambia *Source* a **GitHub Actions**. Este paso es manual y sin él no se publica nada.
-2. En **Settings → Secrets and variables → Actions → Variables**, crea la variable `VITE_API_URL` con la URL del Worker.
-3. Empuja a `main`. El workflow construye y publica solo.
-
-Queda en `https://citizen-netizen.github.io/NaturIA/`. Genera el QR con esa dirección.
-
-> Las rutas de GitHub Pages distinguen mayúsculas: el repositorio se llama `NaturIA`, así que `/naturia/` daría 404. Si algún día usan dominio propio, se construye con `VITE_BASE=/`.
-
-### 3. Despliegue automático del Worker (opcional)
-
-Si añades los secretos `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID` al repositorio, el Worker también se despliega solo al tocar `worker/`. Sin esos secretos el workflow no falla: simplemente se salta ese paso.
+El `id` del KV se deja con su marcador a propósito: el workflow lo sustituye durante el despliegue, así que el repositorio nunca guarda identificadores de infraestructura.
 
 ---
 
