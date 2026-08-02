@@ -1,0 +1,48 @@
+name: Desplegar el Worker de IA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/**'
+      - '.github/workflows/deploy-worker.yml'
+  workflow_dispatch:
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: worker/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      # Sin el token de Cloudflare el despliegue se salta en vez de fallar:
+      # asi el repositorio no queda en rojo antes de que alguien configure
+      # la cuenta.
+      - name: Comprobar credenciales
+        id: credenciales
+        run: |
+          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "listo=si" >> "$GITHUB_OUTPUT"
+          else
+            echo "listo=no" >> "$GITHUB_OUTPUT"
+            echo "::notice::Falta el secreto CLOUDFLARE_API_TOKEN; se omite el despliegue del Worker."
+          fi
+
+      - name: Desplegar
+        if: steps.credenciales.outputs.listo == 'si'
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,0 +1,49 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "naturia-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-01",
+
+  "observability": { "enabled": true },
+
+  "vars": {
+    // Origenes del navegador autorizados, separados por coma. Sin barra final.
+    // Para probar en local se agrega el origen de `vite dev`.
+    "ALLOWED_ORIGINS": "https://citizen-netizen.github.io,http://localhost:5173",
+
+    // Debe estar en la lista blanca de src/openrouter.ts o se ignora.
+    "MODEL": "google/gemini-2.0-flash-001",
+
+    // Tope de peticiones al modelo por dia en todo el sitio. Es la defensa
+    // principal del presupuesto: subelo o bajalo segun lo que decida el
+    // colegio antes de la feria.
+    "DAILY_BUDGET": "400",
+
+    "PUBLIC_URL": "https://citizen-netizen.github.io/NaturIA/"
+  },
+
+  // La API key NO va aqui. Se carga como secreto, fuera del repositorio:
+  //   npx wrangler secret put OPENROUTER_API_KEY
+  // En local se pone en `.dev.vars`, que esta en .gitignore.
+
+  "kv_namespaces": [
+    {
+      "binding": "BUDGET",
+      // Reemplazar con el id real que devuelve:
+      //   npx wrangler kv namespace create BUDGET
+      "id": "REEMPLAZAR_CON_EL_ID_DE_KV"
+    }
+  ],
+
+  "ratelimits": [
+    {
+      "name": "CHAT_LIMITER",
+      // Identificador local del limitador; cualquier entero sirve mientras
+      // no se repita dentro de este Worker.
+      "namespace_id": "1001",
+      // `period` solo admite 10 o 60 segundos: por eso el tope diario se
+      // lleva aparte en KV.
+      "simple": { "limit": 8, "period": 60 }
+    }
+  ]
+}

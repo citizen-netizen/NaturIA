@@ -1,0 +1,11 @@
+# Copia este archivo a `.dev.vars` para desarrollo local.
+# `.dev.vars` está en .gitignore: la clave real nunca debe llegar al repositorio.
+#
+# En producción la clave se carga como secreto de Cloudflare:
+#   npx wrangler secret put OPENROUTER_API_KEY
+
+OPENROUTER_API_KEY=sk-or-v1-tu-clave-aqui
+
+# Opcional, solo para pruebas: apunta el proxy a un simulador local
+# en vez de a OpenRouter, para no gastar cuota.
+# OPENROUTER_BASE_URL=http://localhost:9911/

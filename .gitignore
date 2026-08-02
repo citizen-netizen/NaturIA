@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.DS_Store
+
+# Secretos de desarrollo del Worker. La API key de OpenRouter nunca
+# debe entrar al repositorio: en produccion va como secreto de Cloudflare.
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Estado local de wrangler (KV simulado, caches)
+.wrangler/
+
+*.log
+.env.local
