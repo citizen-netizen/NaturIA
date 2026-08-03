@@ -38,7 +38,10 @@ export interface EvaluateResponse {
 
 export type ApiErrorCode =
   | 'bad_request'
+  /** Ritmo del propio visitante: nuestro limitador por IP. */
   | 'rate_limited'
+  /** Cuota por minuto del proveedor: hay varias personas preguntando a la vez. */
+  | 'provider_busy'
   | 'budget_exhausted'
   | 'upstream_error'
   | 'not_configured'
@@ -52,18 +55,24 @@ export interface ApiError {
 }
 
 export interface Env {
-  /** Secreto: `wrangler secret put OPENROUTER_API_KEY`. Nunca en el repo. */
-  OPENROUTER_API_KEY?: string
+  /** Secreto: `wrangler secret put AI_API_KEY`. Nunca en el repo. */
+  AI_API_KEY?: string
+  /** 'gemini' (por defecto) u 'openrouter'. Ver `providers.ts`. */
+  AI_PROVIDER?: string
   /** Origenes permitidos, separados por coma. */
   ALLOWED_ORIGINS: string
-  /** Modelo por defecto; debe estar en la lista blanca de `openrouter.ts`. */
+  /** Identificador del modelo, tal como lo nombra el proveedor elegido. */
   MODEL: string
   /** Tope de peticiones al modelo por dia, en todo el sitio. */
   DAILY_BUDGET: string
   /** URL publica de la app, para la cabecera de ranking de OpenRouter. */
   PUBLIC_URL: string
-  /** Solo para pruebas: apunta el proxy a un simulador local. */
-  OPENROUTER_BASE_URL?: string
+  /**
+   * Sobreescribe la URL del proveedor. Sirve para apuntar a un simulador
+   * durante las pruebas, o a un proveedor compatible con OpenAI que no este
+   * en la lista de `providers.ts`.
+   */
+  AI_BASE_URL?: string
   BUDGET: KVNamespace
   CHAT_LIMITER: RateLimit
 }

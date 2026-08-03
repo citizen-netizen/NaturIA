@@ -1,5 +1,14 @@
 name: Desplegar el Worker de IA
 
+# Este workflow existe para que todo el montaje de Cloudflare se pueda hacer
+# desde el navegador de un celular: crea el almacén KV, despliega el Worker y
+# carga la API key, sin necesidad de una terminal.
+#
+# Requiere tres secretos en Settings -> Secrets and variables -> Actions:
+#   CLOUDFLARE_API_TOKEN    (plantilla "Edit Cloudflare Workers")
+#   CLOUDFLARE_ACCOUNT_ID
+#   AI_API_KEY
+
 on:
   push:
     branches: [main]
@@ -14,6 +23,9 @@ jobs:
     defaults:
       run:
         working-directory: worker
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,22 +39,119 @@ jobs:
 
       - run: npm run typecheck
 
-      # Sin el token de Cloudflare el despliegue se salta en vez de fallar:
-      # asi el repositorio no queda en rojo antes de que alguien configure
-      # la cuenta.
+      # Sin el token de Cloudflare el despliegue se salta en vez de fallar,
+      # para que el repositorio no quede en rojo antes de configurar la cuenta.
       - name: Comprobar credenciales
         id: credenciales
         run: |
-          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
             echo "listo=si" >> "$GITHUB_OUTPUT"
           else
             echo "listo=no" >> "$GITHUB_OUTPUT"
-            echo "::notice::Falta el secreto CLOUDFLARE_API_TOKEN; se omite el despliegue del Worker."
+            echo "::notice::Falta el secreto CLOUDFLARE_API_TOKEN; se omite el despliegue."
           fi
 
-      - name: Desplegar
+      # `wrangler.jsonc` se versiona con un marcador en lugar del id del KV.
+      # Aquí se resuelve el id real y se sustituye solo en el espacio de
+      # trabajo de CI, así que el repositorio nunca guarda identificadores de
+      # infraestructura y nadie tiene que editar el archivo a mano.
+      - name: Aprovisionar el almacén KV
+        id: kv
         if: steps.credenciales.outputs.listo == 'si'
-        run: npx wrangler deploy
+        run: |
+          set -uo pipefail
+          TITULO="naturia-api-BUDGET"
+
+          buscar_id() {
+            # Wrangler puede anteponer avisos a la salida, así que hay que
+            # quedarse solo con el JSON. El corchete va anclado a inicio de
+            # línea: un aviso como "▲ [WARNING] ..." también trae corchetes y
+            # sin el ancla se colaría dentro de lo que se le pasa a jq.
+            npx wrangler kv namespace list 2>/dev/null \
+              | sed -n '/^[[:space:]]*\[/,$p' \
+              | jq -r --arg t "$TITULO" 'map(select(.title == $t)) | .[0].id // empty' 2>/dev/null
+          }
+
+          ID="$(buscar_id)"
+
+          if [ -z "$ID" ]; then
+            echo "No existe el almacén '$TITULO'; se crea."
+            # El id son 32 caracteres hexadecimales; extraerlo así funciona
+            # con cualquiera de los formatos de salida de wrangler.
+            ID="$(npx wrangler kv namespace create BUDGET 2>&1 | grep -oE '[0-9a-f]{32}' | head -1)"
+            [ -z "$ID" ] && ID="$(buscar_id)"
+          fi
+
+          if [ -z "$ID" ]; then
+            echo "::error::No pude obtener el id del almacén KV. Revisa que el token incluya permiso de Workers KV Storage."
+            exit 1
+          fi
+
+          echo "Almacén KV listo: $ID"
+          sed -i "s/REEMPLAZAR_CON_EL_ID_DE_KV/$ID/" wrangler.jsonc
+          grep -q "REEMPLAZAR_CON_EL_ID_DE_KV" wrangler.jsonc && {
+            echo "::error::No se pudo sustituir el marcador del id de KV."
+            exit 1
+          }
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+
+      - name: Desplegar
+        id: desplegar
+        if: steps.credenciales.outputs.listo == 'si'
+        run: |
+          set -uo pipefail
+          npx wrangler deploy 2>&1 | tee /tmp/deploy.log
+          URL="$(grep -oE 'https://[a-zA-Z0-9._-]+\.workers\.dev' /tmp/deploy.log | head -1)"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      # Los secretos se fijan después del despliegue porque el Worker debe
+      # existir antes. Cloudflare publica una versión nueva por su cuenta al
+      # guardarlo, así que no hace falta volver a desplegar.
+      - name: Cargar la API key del proveedor de IA
+        id: llave
+        if: steps.credenciales.outputs.listo == 'si'
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+        run: |
+          if [ -z "$AI_API_KEY" ]; then
+            echo "cargada=no" >> "$GITHUB_OUTPUT"
+            echo "::warning::Falta el secreto AI_API_KEY. El Worker queda desplegado pero sin IA: la app responderá desde su base local."
+            exit 0
+          fi
+          # Por tubería, nunca como argumento: así no aparece en la línea de
+          # comandos ni en los registros (GitHub además enmascara sus secretos).
+          printf '%s' "$AI_API_KEY" | npx wrangler secret put AI_API_KEY
+          echo "cargada=si" >> "$GITHUB_OUTPUT"
+
+      # Resumen legible desde el celular, para no bucear en los registros.
+      - name: Resumen
+        if: always() && steps.credenciales.outputs.listo == 'si'
+        run: |
+          URL="${{ steps.desplegar.outputs.url }}"
+          {
+            echo "## Worker de NaturIA"
+            echo
+            if [ -n "$URL" ]; then
+              echo "**URL:** \`$URL\`"
+              echo
+              echo "**Comprueba que la IA responde:** [\`$URL/api/diagnostico\`]($URL/api/diagnostico)"
+              echo
+              echo "Ese enlace hace una llamada real al proveedor y explica en español qué falla, si algo falla. Ábrelo antes de seguir."
+              echo
+              if [ "${{ steps.llave.outputs.cargada }}" = "si" ]; then
+                echo "La API key quedó cargada."
+              else
+                echo "⚠️ Sin API key todavía: el diagnóstico dirá \`sin_llave\`."
+              fi
+              echo
+              echo "### Falta un paso para conectar la app"
+              echo
+              echo "1. Settings → Secrets and variables → Actions → pestaña **Variables**."
+              echo "2. Crear \`VITE_API_URL\` con el valor \`$URL\`"
+              echo "3. Actions → **Desplegar la app a GitHub Pages** → *Run workflow*."
+              echo
+              echo "> El paso 3 no es opcional: crear o cambiar una variable **no** dispara ningún despliegue por sí sola. Sin relanzar ese workflow, la app seguirá respondiendo desde su base local."
+            else
+              echo "No se pudo determinar la URL. Revisa el registro del paso *Desplegar*."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -22,7 +22,10 @@ export interface EvaluateResponse {
 
 export type ApiErrorCode =
   | 'bad_request'
+  /** Ritmo del propio visitante: nuestro limitador por IP. */
   | 'rate_limited'
+  /** Cuota por minuto del proveedor: varias personas preguntando a la vez. */
+  | 'provider_busy'
   | 'budget_exhausted'
   | 'upstream_error'
   | 'not_configured'
@@ -42,7 +45,11 @@ export class AiError extends Error {
    * Si conviene responder desde la base local en vez de mostrar un error.
    *
    * `rate_limited` se queda fuera a proposito: ahi el problema es que la
-   * persona va demasiado rapido, y basta con que espere unos segundos.
+   * misma persona va demasiado rapido, y basta con que espere unos segundos.
+   *
+   * `provider_busy` si degrada, aunque tambien sea un 429: ahi el visitante
+   * no hizo nada mal, simplemente coincidio con otros en la cola del stand.
+   * Dejarlo sin respuesta seria castigarlo por algo ajeno.
    */
   get shouldFallBackOffline(): boolean {
     return this.code !== 'rate_limited' && this.code !== 'bad_request'

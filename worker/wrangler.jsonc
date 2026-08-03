@@ -11,25 +11,46 @@
     // Para probar en local se agrega el origen de `vite dev`.
     "ALLOWED_ORIGINS": "https://citizen-netizen.github.io,http://localhost:5173",
 
-    // Debe estar en la lista blanca de src/openrouter.ts o se ignora.
-    "MODEL": "google/gemini-2.0-flash-001",
+    // "gemini" (Google AI Studio) u "openrouter". Ver src/providers.ts.
+    //
+    // Gemini tiene el nivel gratuito mas holgado con diferencia: 250
+    // peticiones al dia con Flash y 1.000 con Flash-Lite, frente a las 50 de
+    // OpenRouter. Los dos hablan el mismo formato de API, asi que cambiar de
+    // uno a otro es solo tocar esta variable y MODEL.
+    "AI_PROVIDER": "gemini",
 
-    // Tope de peticiones al modelo por dia en todo el sitio. Es la defensa
-    // principal del presupuesto: subelo o bajalo segun lo que decida el
-    // colegio antes de la feria.
-    "DAILY_BUDGET": "400",
+    // Identificador tal como lo nombra el proveedor elegido.
+    //   gemini     -> gemini-2.5-flash | gemini-2.5-flash-lite
+    //   openrouter -> algo terminado en :free
+    // Si deja de existir, /api/diagnostico lo dira con todas sus letras.
+    "MODEL": "gemini-2.5-flash",
+
+    // Tope de peticiones al modelo por dia en todo el sitio.
+    //
+    // Va deliberadamente por debajo del limite del proveedor (250/dia con
+    // Gemini Flash) para que el freno sea el nuestro y no el suyo: asi el
+    // visitante recibe la degradacion explicada a la base local, en vez de
+    // un error crudo. Subelo si pasan a un plan de pago.
+    "DAILY_BUDGET": "200",
 
     "PUBLIC_URL": "https://citizen-netizen.github.io/NaturIA/"
   },
 
   // La API key NO va aqui. Se carga como secreto, fuera del repositorio:
-  //   npx wrangler secret put OPENROUTER_API_KEY
+  //   npx wrangler secret put AI_API_KEY
   // En local se pone en `.dev.vars`, que esta en .gitignore.
 
   "kv_namespaces": [
     {
       "binding": "BUDGET",
-      // Reemplazar con el id real que devuelve:
+      // Este marcador se queda tal cual en el repositorio a proposito.
+      //
+      // El workflow `.github/workflows/deploy-worker.yml` crea el almacen si
+      // hace falta y sustituye este valor por el id real durante el
+      // despliegue, sin commitear nada. Asi el montaje completo se puede
+      // hacer desde el navegador de un celular.
+      //
+      // Solo hay que reemplazarlo a mano si se despliega desde una terminal:
       //   npx wrangler kv namespace create BUDGET
       "id": "REEMPLAZAR_CON_EL_ID_DE_KV"
     }

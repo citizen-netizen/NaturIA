@@ -22,6 +22,7 @@ interface ErrorPayload {
 const KNOWN_CODES: ApiErrorCode[] = [
   'bad_request',
   'rate_limited',
+  'provider_busy',
   'budget_exhausted',
   'upstream_error',
   'not_configured',
