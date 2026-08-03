@@ -10,7 +10,7 @@ Los visitantes escanean un código QR en el stand, la app se abre en su celular 
 
 **Cuatro estaciones.** Genética, química molecular, ecosistemas colombianos y las leyes de Newton. Cada una con sus conceptos clave y su propio tutor.
 
-**Tutor con IA de verdad.** Conversación con respuesta en streaming, palabra por palabra, a través de un modelo servido por OpenRouter. Cada estación tiene su propio *system prompt*: el tutor de Newton parte de situaciones cotidianas, el de ecosistemas prioriza el páramo y el bosque andino.
+**Tutor con IA de verdad.** Conversación con respuesta en streaming, palabra por palabra, servida por Gemini o por OpenRouter, a elección. Cada estación tiene su propio *system prompt*: el tutor de Newton parte de situaciones cotidianas, el de ecosistemas prioriza el páramo y el bosque andino.
 
 **Laboratorio de Prompts.** El estudiante escribe el prompt que le haría a una IA y esta se lo califica de 0 a 100 sobre cuatro criterios (claridad, especificidad, contexto y formato), le dice qué mejorar y se lo devuelve reescrito. Es el ejercicio central del proyecto: aprender a preguntar, no solo a recibir respuestas.
 
@@ -24,14 +24,14 @@ Los visitantes escanean un código QR en el stand, la app se abre en su celular 
 
 ```
 app/       PWA en React + TypeScript, construida con Vite
-worker/    Worker de Cloudflare que hace de proxy de OpenRouter
+worker/    Worker de Cloudflare que hace de proxy del proveedor de IA
 ```
 
 Son dos piezas que se despliegan por separado: la app a GitHub Pages y el Worker a Cloudflare.
 
 ### Por qué hace falta un backend
 
-**La API key de OpenRouter no puede ir en la aplicación.** El sitio es público y su código fuente se lee con dos clics; cualquiera podría copiar la llave y gastar la cuenta del colegio. Por eso existe el Worker: la llave vive solo ahí, como secreto de Cloudflare, y el navegador nunca la ve.
+**La API key del proveedor de IA no puede ir en la aplicación.** El sitio es público y su código fuente se lee con dos clics; cualquiera podría copiar la llave y gastar la cuenta del colegio. Por eso existe el Worker: la llave vive solo ahí, como secreto de Cloudflare, y el navegador nunca la ve.
 
 El Worker además protege el presupuesto, algo que importa cuando la dirección del servicio va impresa en un cartel:
 
@@ -51,7 +51,7 @@ Hace falta Node 22 o superior.
 # 1. El backend
 cd worker
 npm install
-cp .dev.vars.example .dev.vars     # y pega tu API key de OpenRouter
+cp .dev.vars.example .dev.vars     # y pega tu API key del proveedor
 npm run dev                        # queda en http://localhost:8787
 
 # 2. La app, en otra terminal
@@ -62,10 +62,11 @@ echo "VITE_BASE=/" >> .env.local
 npm run dev                        # queda en http://localhost:5173
 ```
 
-Para comprobar que el backend responde:
+Para comprobar que el backend responde, y que además llega al proveedor de IA:
 
 ```bash
 curl http://localhost:8787/api/health
+curl http://localhost:8787/api/diagnostico
 ```
 
 ---
@@ -87,11 +88,30 @@ Con esto la app ya funciona, pero el tutor responderá siempre desde su base loc
 
 **No necesitas terminal.** El workflow crea el almacén KV, despliega el Worker y carga la API key por ti. Todo se puede hacer desde un celular.
 
-Necesitas una cuenta gratuita de Cloudflare y una API key de OpenRouter.
+Hacen falta dos cuentas gratuitas: **Cloudflare** (donde vive el Worker) y un **proveedor de IA**.
 
-**En el panel de Cloudflare:**
+#### Qué proveedor elegir
 
-1. Ve a **My Profile → API Tokens → Create Token** y usa la plantilla **Edit Cloudflare Workers**. Esa plantilla ya incluye los permisos de Workers Scripts y de Workers KV Storage, que son los dos que hacen falta. Copia el token: solo se muestra una vez.
+El Worker habla el formato de API de OpenAI, y tanto Gemini como OpenRouter lo exponen. Cambiar de uno a otro es tocar una variable, no reescribir código.
+
+| | Peticiones al día | Por minuto | Tarjeta |
+|---|---|---|---|
+| **Gemini Flash** (por defecto) | 250 | 10 | no |
+| **Gemini Flash-Lite** | 1.000 | 15 | no |
+| OpenRouter `:free` | 50 | 20 | no |
+
+**Gemini viene configurado por defecto** porque su nivel gratuito es entre 5 y 20 veces más holgado, que es justo lo que necesita un stand con cola. La API key se saca de [aistudio.google.com](https://aistudio.google.com/), gratis y sin tarjeta.
+
+Dos cosas que conviene saber, porque circula información desactualizada:
+
+- El crédito de 300 USD de Google Cloud **ya no aplica** al Gemini API: quedó excluido en marzo de 2026.
+- Los modelos **Pro salieron del nivel gratuito** el 1 de abril de 2026. Gratis quedan Flash y Flash-Lite.
+
+#### Los pasos
+
+**En Cloudflare:**
+
+1. **My Profile → API Tokens → Create Token**, plantilla **Edit Cloudflare Workers**. Ya trae los permisos de Workers Scripts y Workers KV Storage, que son los que hacen falta. Copia el token: solo se muestra una vez.
 2. En la página de inicio de tu cuenta, copia el **Account ID**.
 
 **En GitHub → Settings → Secrets and variables → Actions**, pestaña **Secrets**, crea tres:
@@ -100,18 +120,30 @@ Necesitas una cuenta gratuita de Cloudflare y una API key de OpenRouter.
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | el token del paso 1 |
 | `CLOUDFLARE_ACCOUNT_ID` | el Account ID del paso 2 |
-| `OPENROUTER_API_KEY` | tu cuenta de OpenRouter |
+| `AI_API_KEY` | tu clave de Google AI Studio (o de OpenRouter) |
 
 **Luego:**
 
-3. Ve a **Actions → Desplegar el Worker de IA → Run workflow**.
-4. Cuando termine, abre el run: en el resumen aparece la URL del Worker, algo como `https://naturia-api.tu-cuenta.workers.dev`.
-5. En **Variables** (la otra pestaña, no Secrets), crea `VITE_API_URL` con esa URL.
-6. Ve a **Actions → Desplegar la app a GitHub Pages → Run workflow**.
+3. **Actions → Desplegar el Worker de IA → Run workflow**.
+4. Cuando termine, abre el run: el resumen trae la URL del Worker, algo como `https://naturia-api.tu-cuenta.workers.dev`.
+5. **Abre `TU-WORKER.workers.dev/api/diagnostico`.** Hace una llamada real al proveedor y te dice en español si algo falla. No sigas hasta ver `"ok": true`.
+6. En **Variables** (la otra pestaña, no Secrets), crea `VITE_API_URL` con la URL del Worker.
+7. **Actions → Desplegar la app a GitHub Pages → Run workflow**.
 
-> **El paso 6 no es opcional.** Crear o cambiar una variable **no dispara ningún despliegue** por sí sola. Si te saltas ese paso, `VITE_API_URL` no entra en la compilación y el tutor seguirá respondiendo desde la base local aunque el Worker esté perfecto. Es el tropiezo más fácil de todo el montaje.
+> **El paso 7 no es opcional.** Crear o cambiar una variable **no dispara ningún despliegue** por sí sola. Si te lo saltas, `VITE_API_URL` no entra en la compilación y el tutor seguirá respondiendo desde la base local aunque el Worker esté perfecto. Es el tropiezo más fácil de todo el montaje.
 
-Para comprobar que quedó bien, abre `https://TU-WORKER.workers.dev/api/health`. Debe decir `"configured": true`.
+#### Si algo falla
+
+`/api/diagnostico` traduce el problema a algo accionable:
+
+| Causa | Qué hacer |
+|---|---|
+| `sin_llave` | falta el secreto `AI_API_KEY`; añádelo y relanza el workflow |
+| `llave_invalida` | la clave está incompleta, vencida, o es de otro proveedor |
+| `sin_creditos` | ese modelo no es gratuito; cambia `MODEL` |
+| `modelo_inexistente` | el identificador cambió; busca uno vigente en el catálogo |
+| `limite_proveedor` | agotaste la cuota por minuto o por día; espera |
+| `presupuesto_agotado` | tu propio `DAILY_BUDGET`; el Worker está bien |
 
 ### 3. El Worker desde una terminal (alternativa)
 
@@ -129,41 +161,44 @@ npx wrangler kv namespace create BUDGET
 npx wrangler deploy
 
 # La llave queda en Cloudflare, nunca en el repositorio
-npx wrangler secret put OPENROUTER_API_KEY
+npx wrangler secret put AI_API_KEY
 ```
 
 ### Ajustes del Worker
 
 En `worker/wrangler.jsonc`, dentro de `vars`:
 
+- `AI_PROVIDER`: `gemini` (por defecto) u `openrouter`.
+- `MODEL`: el identificador tal como lo nombra ese proveedor. Con Gemini, `gemini-2.5-flash` o `gemini-2.5-flash-lite`; con OpenRouter, algo terminado en `:free`.
 - `ALLOWED_ORIGINS`: los orígenes autorizados, separados por coma y sin barra final.
 - `DAILY_BUDGET`: cuántas consultas al modelo se permiten por día en todo el sitio.
-- `MODEL`: debe ser uno de la lista blanca de `worker/src/openrouter.ts`.
 
 El `id` del KV se deja con su marcador a propósito: el workflow lo sustituye durante el despliegue, así que el repositorio nunca guarda identificadores de infraestructura.
 
+**No hay lista blanca de modelos.** El modelo solo lo puede fijar quien tiene acceso al repositorio o a Cloudflare — el navegador nunca lo elige— así que una lista blanca no protegía de nadie, y en cambio escondía las erratas cambiando el modelo por detrás en silencio. Ahora se usa exactamente lo que digas, y `/api/health` avisa si el modelo no parece del nivel gratuito.
+
 ---
 
-## Antes de la feria: decidan la cuota
+## Sobre la cuota
 
-Esto hay que resolverlo con tiempo, porque condiciona la experiencia del stand.
+`DAILY_BUDGET` está en **200**, deliberadamente por debajo de las 250 diarias de Gemini Flash. Así el freno es el nuestro y no el del proveedor: cuando se alcanza, el visitante recibe una explicación y una respuesta de la base local, en vez de un error crudo.
 
-El nivel gratuito de OpenRouter permite **50 peticiones al día** si la cuenta tiene saldo bajo, y **20 por minuto** en los modelos con sufijo `:free`. Una feria con varias decenas de visitantes se come 50 peticiones en la primera media hora, y a partir de ahí todos verían respuestas de la base local.
+Si esperan mucha gente, hay dos palancas sin gastar un peso:
 
-Dos caminos:
+- Cambiar `MODEL` a `gemini-2.5-flash-lite` y subir `DAILY_BUDGET` a unas 900. Cuadruplica la capacidad a cambio de respuestas algo más simples.
+- Dejar Flash y asumir que, pasadas 200 consultas, el tutor responde desde la base local. Sigue siendo una demostración válida: la sección de metacognición trata precisamente de no depender ciegamente de la IA.
 
-- **Comprar 10 USD una sola vez.** Los créditos no expiran y el tope diario sube a 1000 peticiones. Es la opción recomendada.
-- **Usar un modelo de pago barato** y fijar `DAILY_BUDGET` según lo que estén dispuestos a gastar.
-
-En cualquier caso, `DAILY_BUDGET` es el freno de mano: cuando se alcanza, el Worker deja de llamar al modelo y la app sigue funcionando con su base local.
+El techo real en un stand con cola no es el diario sino **el de por minuto** (10 con Flash, 15 con Flash-Lite). Cuando se alcanza, la app lo dice con sus palabras — *"hay varias personas preguntando al mismo tiempo"*— y responde desde la base local, para que no parezca que se rompió.
 
 ### Comprobar el estado antes de abrir el stand
 
-```bash
-curl https://TU-WORKER.workers.dev/api/health
+Abre en el navegador:
+
+```
+https://TU-WORKER.workers.dev/api/diagnostico
 ```
 
-Si responde `"configured": true`, el tutor está listo.
+Si dice `"ok": true`, el tutor está listo. Cuesta una petición de la cuota del día.
 
 ---
 

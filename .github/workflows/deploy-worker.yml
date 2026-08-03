@@ -7,7 +7,7 @@ name: Desplegar el Worker de IA
 # Requiere tres secretos en Settings -> Secrets and variables -> Actions:
 #   CLOUDFLARE_API_TOKEN    (plantilla "Edit Cloudflare Workers")
 #   CLOUDFLARE_ACCOUNT_ID
-#   OPENROUTER_API_KEY
+#   AI_API_KEY
 
 on:
   push:
@@ -107,20 +107,20 @@ jobs:
       # Los secretos se fijan después del despliegue porque el Worker debe
       # existir antes. Cloudflare publica una versión nueva por su cuenta al
       # guardarlo, así que no hace falta volver a desplegar.
-      - name: Cargar la API key de OpenRouter
+      - name: Cargar la API key del proveedor de IA
         id: llave
         if: steps.credenciales.outputs.listo == 'si'
         env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
         run: |
-          if [ -z "$OPENROUTER_API_KEY" ]; then
+          if [ -z "$AI_API_KEY" ]; then
             echo "cargada=no" >> "$GITHUB_OUTPUT"
-            echo "::warning::Falta el secreto OPENROUTER_API_KEY. El Worker queda desplegado pero sin IA: la app responderá desde su base local."
+            echo "::warning::Falta el secreto AI_API_KEY. El Worker queda desplegado pero sin IA: la app responderá desde su base local."
             exit 0
           fi
           # Por tubería, nunca como argumento: así no aparece en la línea de
           # comandos ni en los registros (GitHub además enmascara sus secretos).
-          printf '%s' "$OPENROUTER_API_KEY" | npx wrangler secret put OPENROUTER_API_KEY
+          printf '%s' "$AI_API_KEY" | npx wrangler secret put AI_API_KEY
           echo "cargada=si" >> "$GITHUB_OUTPUT"
 
       # Resumen legible desde el celular, para no bucear en los registros.
@@ -134,12 +134,14 @@ jobs:
             if [ -n "$URL" ]; then
               echo "**URL:** \`$URL\`"
               echo
-              echo "Comprobación rápida: [\`$URL/api/health\`]($URL/api/health)"
+              echo "**Comprueba que la IA responde:** [\`$URL/api/diagnostico\`]($URL/api/diagnostico)"
+              echo
+              echo "Ese enlace hace una llamada real al proveedor y explica en español qué falla, si algo falla. Ábrelo antes de seguir."
               echo
               if [ "${{ steps.llave.outputs.cargada }}" = "si" ]; then
-                echo "La API key quedó cargada. \`/api/health\` debería responder \`\"configured\": true\`."
+                echo "La API key quedó cargada."
               else
-                echo "⚠️ Sin API key todavía: \`/api/health\` responderá \`\"configured\": false\`."
+                echo "⚠️ Sin API key todavía: el diagnóstico dirá \`sin_llave\`."
               fi
               echo
               echo "### Falta un paso para conectar la app"
